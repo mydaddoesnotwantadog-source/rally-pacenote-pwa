@@ -47,7 +47,7 @@ body {
 /* Vertical Pager for iOS Native Swipe */
 .vertical-pager {
     width: 100%;
-    height: 100%;
+    flex: 1; /* Fixes height collapsing in flex containers */
     overflow-y: auto;
     scroll-snap-type: y mandatory;
     scroll-behavior: smooth;
@@ -67,6 +67,8 @@ body {
     scroll-snap-stop: always;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 /* Screens */

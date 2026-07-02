@@ -1,5 +1,5 @@
 import { initDB, saveRouteOffline } from './route_manager.js';
-import { generatePacenotes, getUpcomingNotes } from './pacenote_engine.js';
+import { generatePacenotes } from './pacenote_engine.js';
 import { startDrive, stopDrive, setUIHandlers, setMetricState, playAudioCallout } from './execution_engine.js';
 
 // --- UI ELEMENTS ---
