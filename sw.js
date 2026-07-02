@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rally-pwa-v24';
+const CACHE_NAME = 'rally-pwa-v25';
 
 const APP_SHELL = [
     '/',

@@ -484,7 +484,8 @@ h1 .accent {
 
 .turn-callout {
     font-family: var(--font-heading);
-    font-size: 4rem;
+    font-size: clamp(1.8rem, 8vw, 4rem);
+    line-height: 1.1;
     font-weight: 900;
     color: var(--text-primary);
 }
