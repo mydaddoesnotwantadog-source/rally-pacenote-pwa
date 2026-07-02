@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rally-pwa-v25';
+const CACHE_NAME = 'rally-pwa-v26';
 
 const APP_SHELL = [
     '/',
@@ -10,16 +10,11 @@ const APP_SHELL = [
     '/js/execution_engine.js'
 ];
 
-// Placeholder for audio files we'd cache
-const AUDIO_ASSETS = [
-    // '/audio/left_5.m4a'
-];
-
 self.addEventListener('install', (event) => {
     self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME)
-        .then((cache) => cache.addAll([...APP_SHELL, ...AUDIO_ASSETS]))
+        .then((cache) => cache.addAll(APP_SHELL))
     );
 });
 
@@ -37,14 +32,27 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
     
-    // Bypass SW for map tiles. Leaflet aggressively aborts fetch requests when panning,
-    // which causes standard SW fetch handlers to crash and leave blank gray tiles.
+    // Bypass SW for map tiles
     if (url.hostname.includes('tile.openstreetmap.org') || url.hostname.includes('cartocdn.com')) {
-        return; // Let the browser handle these directly
+        return; 
     }
 
     event.respondWith(
         caches.match(event.request)
-        .then((response) => response || fetch(event.request))
+        .then((response) => {
+            if (response) return response;
+            return fetch(event.request).then((networkResponse) => {
+                // Dynamically cache audio files as they are loaded
+                if (url.pathname.includes('/audio/')) {
+                    const responseClone = networkResponse.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, responseClone);
+                    });
+                }
+                return networkResponse;
+            }).catch(() => {
+                // Return offline fallback if needed
+            });
+        })
     );
 });

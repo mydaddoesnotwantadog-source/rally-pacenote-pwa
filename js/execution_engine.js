@@ -17,6 +17,12 @@ if (synth) {
     voices = synth.getVoices();
 }
 
+let activeVoicePack = 'samir'; // default
+
+export function setActiveVoicePack(packId) {
+    activeVoicePack = packId;
+}
+
 export function setMetricState(state) {
     isMetric = state;
 }
@@ -132,7 +138,12 @@ function handleLocationError(error) {
     console.warn(`[Engine] Geolocation error: ${error.message}`);
 }
 
-export function playAudioCallout(calloutText) {
+export async function playAudioCallout(calloutText) {
+    if (activeVoicePack === 'samir') {
+        await playSamirCallout(calloutText);
+        return;
+    }
+
     if (!synth) return;
 
     // Use Web Speech API for the "Basic TTS" pack
@@ -152,6 +163,94 @@ export function playAudioCallout(calloutText) {
     
     // Play immediately
     synth.speak(utterance);
+}
+
+const samirMap = {
+    6: 'easy',
+    5: 'fast',
+    4: 'medium',
+    3: 'k',
+    2: 'k',
+    1: '90',
+    'Square': '90',
+    'Hairpin': 'hairpin'
+};
+
+async function playSamirCallout(text) {
+    // Parse the text, e.g. "Left 4 Long Tightens 2 Don't Cut"
+    const words = text.split(' ');
+    const audioQueue = [];
+
+    let direction = null;
+    let severity = null;
+
+    for (let i = 0; i < words.length; i++) {
+        const word = words[i];
+        const lower = word.toLowerCase();
+
+        if (lower === 'left' || lower === 'right') {
+            direction = lower;
+            // The next word should be the severity
+            if (i + 1 < words.length) {
+                severity = words[i + 1];
+                let mapped = samirMap[severity];
+                if (mapped) {
+                    audioQueue.push(`audio/samir/${mapped}_${direction}1.ogg`);
+                    i++; // skip severity word
+                } else if (severity.toLowerCase() === 'hairpin') {
+                    audioQueue.push(`audio/samir/hairpin_${direction}1.ogg`);
+                    i++;
+                } else {
+                    // Fallback just in case
+                }
+            }
+        } else if (lower === 'long') {
+            audioQueue.push('audio/samir/long1.ogg');
+        } else if (lower === 'tightens') {
+            audioQueue.push('audio/samir/tightens1.ogg');
+            // Check next for severity
+            if (i + 1 < words.length) {
+                const nextSev = words[i + 1];
+                let mapped = samirMap[nextSev];
+                if (mapped) {
+                    // It tightens to a severity, just play the new severity corner?
+                    // Samir audio just has "tightens1.ogg". If we want we can also play the new severity.
+                    // For now, let's just say "Tightens" and optionally the new curve.
+                    // "tightens 2" -> "tightens1.ogg" followed by "k_left1.ogg" if we still remember direction.
+                    if (direction && mapped) {
+                        audioQueue.push(`audio/samir/${mapped}_${direction}1.ogg`);
+                    }
+                    i++;
+                }
+            }
+        } else if (lower === 'opens') {
+            audioQueue.push('audio/samir/wideout1.ogg');
+            if (i + 1 < words.length) {
+                const nextSev = words[i + 1];
+                let mapped = samirMap[nextSev];
+                if (mapped && direction) {
+                    audioQueue.push(`audio/samir/${mapped}_${direction}1.ogg`);
+                    i++;
+                }
+            }
+        } else if (lower === "don't" && words[i+1]?.toLowerCase() === 'cut') {
+            audioQueue.push('audio/samir/dontcut1.ogg');
+            i++;
+        } else if (lower === 'finish' && words[i+1]?.toLowerCase() === 'line') {
+            audioQueue.push('audio/samir/finish.ogg');
+            i++;
+        }
+    }
+
+    // Play queue sequentially
+    for (const src of audioQueue) {
+        await new Promise((resolve) => {
+            const audio = new Audio(src);
+            audio.onended = resolve;
+            audio.onerror = resolve; // Skip missing files gracefully
+            audio.play().catch(resolve);
+        });
+    }
 }
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
