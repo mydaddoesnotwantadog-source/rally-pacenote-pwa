@@ -18,6 +18,18 @@ if (synth) {
 }
 
 let activeVoicePack = 'samir'; // default
+let globalVolume = 1.0;
+const samirPlayer = new Audio();
+let audioCtx = null;
+let gainNode = null;
+let sourceNode = null;
+
+export function setVolume(vol) {
+    globalVolume = parseFloat(vol);
+    if (gainNode) {
+        gainNode.gain.value = globalVolume;
+    }
+}
 
 export function setActiveVoicePack(packId) {
     activeVoicePack = packId;
@@ -242,13 +254,28 @@ async function playSamirCallout(text) {
         }
     }
 
+    // Init Web Audio API dynamically on first play to satisfy browser auto-play policies
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        gainNode = audioCtx.createGain();
+        gainNode.gain.value = globalVolume;
+        gainNode.connect(audioCtx.destination);
+        
+        sourceNode = audioCtx.createMediaElementSource(samirPlayer);
+        sourceNode.connect(gainNode);
+    }
+
+    if (audioCtx.state === 'suspended') {
+        await audioCtx.resume();
+    }
+
     // Play queue sequentially
     for (const src of audioQueue) {
         await new Promise((resolve) => {
-            const audio = new Audio(src);
-            audio.onended = resolve;
-            audio.onerror = resolve; // Skip missing files gracefully
-            audio.play().catch(resolve);
+            samirPlayer.src = src;
+            samirPlayer.onended = resolve;
+            samirPlayer.onerror = resolve; // Skip missing files gracefully
+            samirPlayer.play().catch(resolve);
         });
     }
 }

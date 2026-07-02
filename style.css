@@ -227,10 +227,50 @@ body {
 }
 .preview-btn:active {
     transform: scale(0.92);
-    border-color: var(--accent-red);
-    box-shadow: 0 0 15px rgba(255, 42, 42, 0.4);
-    color: var(--accent-red);
+    background: var(--text-primary);
+    color: var(--bg-color);
 }
+
+.volume-control {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: var(--surface);
+    border: 2px solid var(--surface-border);
+}
+
+.vol-label, .vol-value {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 900;
+    color: var(--accent-red);
+    min-width: 40px;
+}
+
+.brutal-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    background: transparent;
+}
+
+.brutal-slider::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 8px;
+    background: var(--surface-border);
+    border: none;
+}
+
+.brutal-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 24px;
+    width: 12px;
+    background: var(--text-primary);
+    margin-top: -8px;
+    cursor: pointer;
+}
+
 .finish-btn {
     margin-top: 12px;
     background: transparent;

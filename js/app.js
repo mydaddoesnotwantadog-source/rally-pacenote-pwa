@@ -1,6 +1,6 @@
 import { initDB, saveRouteOffline } from './route_manager.js';
 import { generatePacenotes } from './pacenote_engine.js';
-import { startDrive, stopDrive, setUIHandlers, setMetricState, playAudioCallout } from './execution_engine.js';
+import { startDrive, stopDrive, setUIHandlers, setMetricState, playAudioCallout, setVolume } from './execution_engine.js';
 
 // --- UI ELEMENTS ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -18,6 +18,17 @@ document.addEventListener('DOMContentLoaded', () => {
             playAudioCallout(btn.dataset.callout);
         });
     });
+
+    // Volume Slider Logic
+    const volSlider = document.getElementById('master-volume');
+    const volDisplay = document.getElementById('vol-display');
+    if (volSlider) {
+        volSlider.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value).toFixed(1);
+            volDisplay.textContent = val + 'x';
+            setVolume(val);
+        });
+    }
 });
 
 const setupFlow = document.getElementById('setup-flow');
