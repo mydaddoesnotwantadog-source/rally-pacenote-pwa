@@ -319,11 +319,46 @@ h1 .accent {
     color: var(--accent-red);
 }
 
-/* Unit Toggle */
-.unit-toggle { font-size: 0.85rem; font-weight: 800; color: var(--text-secondary); cursor: pointer; user-select: none; display: flex; gap: 6px; }
-.unit-toggle span { transition: color 0.2s; }
-.unit-toggle span.active { color: var(--accent-red); }
-.divider { color: var(--surface-border); }
+/* Satisfying Brutalist Unit Toggle */
+.unit-toggle { 
+    font-size: 1rem; 
+    font-weight: 900; 
+    color: var(--text-secondary); 
+    display: flex; 
+    gap: 8px; 
+    align-items: center;
+    background: var(--surface);
+    padding: 6px 14px;
+    border: 1px solid var(--surface-border);
+    cursor: pointer;
+    user-select: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    transition: transform 0.1s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.2s;
+}
+
+.unit-toggle:active {
+    transform: scale(0.92);
+    border-color: var(--accent-red);
+}
+
+.toggle-option { 
+    transition: color 0.3s cubic-bezier(0.25, 1, 0.5, 1), transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    opacity: 0.4;
+}
+
+.toggle-option.active { 
+    color: #fff; 
+    opacity: 1;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    transform: scale(1.15);
+}
+
+.toggle-divider { 
+    color: var(--accent-red); 
+    font-style: italic;
+    opacity: 0.9;
+    pointer-events: none;
+}
 
 
 /* User Location Marker */

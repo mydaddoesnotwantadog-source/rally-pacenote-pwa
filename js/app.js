@@ -17,6 +17,7 @@ const statAvg = document.getElementById('stat-avg');
 const statHairpins = document.getElementById('stat-hairpins');
 
 // Unit Toggle Elements
+const unitToggleContainer = document.getElementById('unit-toggle');
 const unitKmBtn = document.getElementById('unit-km');
 const unitMiBtn = document.getElementById('unit-mi');
 
@@ -62,8 +63,11 @@ async function initApp() {
     }
 
     // Setup Unit Toggle
-    unitKmBtn.addEventListener('click', () => setUnits(true));
-    unitMiBtn.addEventListener('click', () => setUnits(false));
+    unitToggleContainer.addEventListener('click', () => {
+        // Satisfying physical vibration feedback if on mobile
+        if (navigator.vibrate) navigator.vibrate(40);
+        setUnits(!isMetric);
+    });
 
     initMap();
 }
