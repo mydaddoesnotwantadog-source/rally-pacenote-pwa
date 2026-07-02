@@ -142,6 +142,42 @@ function initMap() {
         }, { enableHighAccuracy: true, maximumAge: 0 });
     }
 
+    // Initialize Device Compass for real-time stationary heading
+    let compassInitialized = false;
+    const initCompass = () => {
+        if (compassInitialized) return;
+        
+        const handleOrientation = (event) => {
+            let heading = null;
+            if (event.webkitCompassHeading) {
+                heading = event.webkitCompassHeading; // iOS
+            } else if (event.alpha !== null) {
+                heading = 360 - event.alpha; // Android
+            }
+            
+            if (heading !== null) {
+                const headingEl = document.querySelector('.user-heading-container');
+                if (headingEl) headingEl.style.transform = `rotate(${heading}deg)`;
+            }
+        };
+
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            DeviceOrientationEvent.requestPermission().then(permissionState => {
+                if (permissionState === 'granted') {
+                    window.addEventListener('deviceorientation', handleOrientation);
+                }
+            }).catch(console.warn);
+        } else {
+            window.addEventListener('deviceorientationabsolute', handleOrientation);
+            window.addEventListener('deviceorientation', handleOrientation);
+        }
+        compassInitialized = true;
+    };
+
+    // Request compass permission on the very first tap anywhere on the screen
+    document.body.addEventListener('click', initCompass, { once: true });
+    document.body.addEventListener('touchstart', initCompass, { once: true });
+
     routingControl = L.Routing.control({
         waypoints: [],
         routeWhileDragging: true,
