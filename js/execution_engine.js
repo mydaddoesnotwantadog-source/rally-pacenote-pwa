@@ -73,8 +73,29 @@ function handleLocationUpdate(position) {
         nextNote.lat, nextNote.lon
     ));
 
-    const distFormatted = isMetric ? distanceToTurn : Math.round(distanceToTurn * 1.09361);
-    if (uiCallbacks.onDistanceUpdate) uiCallbacks.onDistanceUpdate(distFormatted);
+    let distValue, distUnit;
+    if (isMetric) {
+        if (distanceToTurn >= 1000) {
+            distValue = (distanceToTurn / 1000).toFixed(2);
+            distUnit = "KILOMETERS TO";
+        } else {
+            distValue = distanceToTurn;
+            distUnit = "METERS TO";
+        }
+    } else {
+        const distanceInYards = distanceToTurn * 1.09361;
+        const distanceInMiles = distanceToTurn * 0.000621371;
+        
+        if (distanceInMiles >= 1) {
+            distValue = distanceInMiles.toFixed(2);
+            distUnit = "MILES TO";
+        } else {
+            distValue = Math.round(distanceInYards);
+            distUnit = "YARDS TO";
+        }
+    }
+    
+    if (uiCallbacks.onDistanceUpdate) uiCallbacks.onDistanceUpdate(distValue, distUnit);
 
     // Dynamic trigger distance based on speed (min 80 meters to prevent missing tight apexes)
     const triggerDistance = Math.max(80, speedMs * 4);

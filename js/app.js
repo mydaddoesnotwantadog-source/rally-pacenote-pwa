@@ -301,8 +301,9 @@ startDriveBtn.addEventListener('click', async () => {
         onSpeedUpdate: (speed) => {
             document.getElementById('current-speed').textContent = speed;
         },
-        onDistanceUpdate: (dist) => {
+        onDistanceUpdate: (dist, unit) => {
             document.getElementById('distance-to-turn').textContent = dist;
+            if (unit) document.getElementById('distance-unit').textContent = unit;
         },
         onCalloutTrigger: (callout) => {
             const el = document.getElementById('current-callout');
