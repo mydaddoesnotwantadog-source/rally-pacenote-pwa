@@ -4,6 +4,7 @@ let currentRoute = null;
 let upcomingPacenotes = [];
 let currentNoteIndex = 0;
 let isMetric = true;
+let previousDistance = Infinity;
 
 let uiCallbacks = {};
 
@@ -19,6 +20,7 @@ export function startDrive(routeData, pacenotesData) {
     currentRoute = routeData;
     upcomingPacenotes = pacenotesData;
     currentNoteIndex = 0;
+    previousDistance = Infinity;
 
     if (uiCallbacks.onNextUpdate && upcomingPacenotes[0]) {
         uiCallbacks.onNextUpdate(upcomingPacenotes[0].callout);
@@ -65,17 +67,33 @@ function handleLocationUpdate(position) {
     const distFormatted = isMetric ? distanceToTurn : Math.round(distanceToTurn * 1.09361);
     if (uiCallbacks.onDistanceUpdate) uiCallbacks.onDistanceUpdate(distFormatted);
 
-    const triggerDistance = Math.max(30, speedMs * 4);
+    // Dynamic trigger distance based on speed (min 80 meters to prevent missing tight apexes)
+    const triggerDistance = Math.max(80, speedMs * 4);
 
-    if (distanceToTurn <= triggerDistance) {
-        if (uiCallbacks.onCalloutTrigger) uiCallbacks.onCalloutTrigger(nextNote.callout);
-        playAudioCallout(nextNote.callout);
+    // Detect if we physically passed the turn (distance started increasing after getting close)
+    const passedTurn = (distanceToTurn > previousDistance + 15) && (previousDistance < 150);
+
+    if (distanceToTurn <= triggerDistance || passedTurn) {
+        if (!passedTurn) {
+            // Trigger audio warning before the turn
+            if (uiCallbacks.onCalloutTrigger) uiCallbacks.onCalloutTrigger(nextNote.callout);
+            playAudioCallout(nextNote.callout);
+        } else {
+            console.warn(`[Engine] Missed trigger radius for ${nextNote.callout}. Auto-advancing.`);
+        }
         
         currentNoteIndex++;
+        previousDistance = Infinity; // Reset for the next pacenote
+        
         if (uiCallbacks.onNextUpdate && upcomingPacenotes[currentNoteIndex]) {
             uiCallbacks.onNextUpdate(upcomingPacenotes[currentNoteIndex].callout);
         } else if (uiCallbacks.onNextUpdate) {
             uiCallbacks.onNextUpdate('Finish Line');
+        }
+    } else {
+        // Track the closest we've gotten to the current target
+        if (distanceToTurn < previousDistance) {
+            previousDistance = distanceToTurn;
         }
     }
 }
