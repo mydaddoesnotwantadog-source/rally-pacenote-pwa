@@ -122,9 +122,8 @@ h1 .accent {
     background: var(--bg-color) !important;
 }
 
-/* Hide Leaflet attribution watermark and routing container to prevent UI clutter on mobile */
-.leaflet-control-attribution,
-.leaflet-routing-container {
+/* Aggressively hide ALL Leaflet overlay controls (Routing box, zoom, attribution) */
+.leaflet-control-container {
     display: none !important;
 }
 
@@ -351,18 +350,16 @@ h1 .accent {
     display: flex; 
     gap: 8px; 
     align-items: center;
-    background: var(--surface);
-    padding: 6px 14px;
-    border: 1px solid var(--surface-border);
+    background: transparent;
+    padding: 6px 4px;
+    border: none;
     cursor: pointer;
     user-select: none;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-    transition: transform 0.1s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.2s;
+    transition: transform 0.1s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .unit-toggle:active {
     transform: scale(0.92);
-    border-color: var(--accent-red);
 }
 
 .toggle-option { 
