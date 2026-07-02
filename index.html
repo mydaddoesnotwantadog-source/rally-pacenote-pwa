@@ -103,7 +103,54 @@
             </div>
 
             <button id="start-drive-btn" class="primary-btn" disabled>INITIATE DRIVE</button>
+                    
+                    <div style="flex-grow: 1;"></div>
+                    <div class="swipe-hint swipe-up">SWIPE UP FOR AUDIO PREVIEW //</div>
                 </div> <!-- End setup-screen-content -->
+
+                <!-- PREVIEW SCREEN (Bottom) -->
+                <div id="preview-screen" class="pager-screen">
+                    <header class="rigid-header shop-header">
+                        <div class="brand">
+                            <h1>AUDIO<span class="accent">//</span>TESTING</h1>
+                        </div>
+                    </header>
+                    <div class="shop-content preview-content">
+                        <div class="swipe-hint swipe-down" style="padding-top:0;">// SWIPE DOWN TO RETURN</div>
+                        
+                        <div class="preview-dashboard">
+                            <!-- Left Column -->
+                            <div class="preview-col">
+                                <button class="preview-btn" data-callout="Left 6">L6</button>
+                                <button class="preview-btn" data-callout="Left 5">L5</button>
+                                <button class="preview-btn" data-callout="Left 4">L4</button>
+                                <button class="preview-btn" data-callout="Left 3">L3</button>
+                                <button class="preview-btn" data-callout="Left 2">L2</button>
+                                <button class="preview-btn" data-callout="Left 1">L1</button>
+                                <button class="preview-btn" data-callout="Square Left">SQ.L</button>
+                                <button class="preview-btn" data-callout="Left Hairpin">HP.L</button>
+                            </div>
+                            
+                            <!-- Divider -->
+                            <div class="preview-divider"></div>
+                            
+                            <!-- Right Column -->
+                            <div class="preview-col">
+                                <button class="preview-btn" data-callout="Right 6">R6</button>
+                                <button class="preview-btn" data-callout="Right 5">R5</button>
+                                <button class="preview-btn" data-callout="Right 4">R4</button>
+                                <button class="preview-btn" data-callout="Right 3">R3</button>
+                                <button class="preview-btn" data-callout="Right 2">R2</button>
+                                <button class="preview-btn" data-callout="Right 1">R1</button>
+                                <button class="preview-btn" data-callout="Square Right">SQ.R</button>
+                                <button class="preview-btn" data-callout="Right Hairpin">HP.R</button>
+                            </div>
+                        </div>
+
+                        <button class="preview-btn finish-btn" data-callout="Finish Line">FINISH LINE // END</button>
+                    </div>
+                </div> <!-- End preview-screen -->
+
             </div> <!-- End vertical-pager -->
         </section>
 

@@ -111,7 +111,7 @@ function handleLocationError(error) {
     console.warn(`[Engine] Geolocation error: ${error.message}`);
 }
 
-function playAudioCallout(calloutText) {
+export function playAudioCallout(calloutText) {
     if (!synth) return;
 
     // Use Web Speech API for the "Basic TTS" pack

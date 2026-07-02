@@ -1,6 +1,6 @@
 import { initDB, saveRouteOffline } from './route_manager.js';
-import { generatePacenotes } from './pacenote_engine.js';
-import { startDrive, stopDrive, setUIHandlers, setMetricState } from './execution_engine.js';
+import { generatePacenotes, getUpcomingNotes } from './pacenote_engine.js';
+import { startDrive, stopDrive, setUIHandlers, setMetricState, playAudioCallout } from './execution_engine.js';
 
 // --- UI ELEMENTS ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -9,6 +9,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (pager && setupContent) {
         pager.scrollTop = setupContent.offsetTop;
     }
+
+    // Audio Preview Logic
+    const previewBtns = document.querySelectorAll('.preview-btn');
+    previewBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (navigator.vibrate) navigator.vibrate(20);
+            playAudioCallout(btn.dataset.callout);
+        });
+    });
 });
 
 const setupFlow = document.getElementById('setup-flow');

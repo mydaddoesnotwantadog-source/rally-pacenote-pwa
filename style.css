@@ -186,6 +186,56 @@ body {
     color: var(--accent-red);
 }
 
+/* Audio Preview UI */
+.preview-content {
+    overflow-y: auto;
+}
+.preview-dashboard {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 12px;
+    flex: 1;
+}
+.preview-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+.preview-divider {
+    width: 2px;
+    background: var(--surface-border);
+    opacity: 0.5;
+}
+.preview-btn {
+    background: var(--surface);
+    color: var(--text-primary);
+    border: 2px solid var(--surface-border);
+    padding: 14px;
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+.preview-btn:active {
+    transform: scale(0.92);
+    border-color: var(--accent-red);
+    box-shadow: 0 0 15px rgba(255, 42, 42, 0.4);
+    color: var(--accent-red);
+}
+.finish-btn {
+    margin-top: 12px;
+    background: transparent;
+    border-color: var(--text-secondary);
+}
+.finish-btn:active {
+    border-color: var(--accent-red);
+}
+
 /* Map Containers */
 h1 .accent {
     color: var(--accent-red);
