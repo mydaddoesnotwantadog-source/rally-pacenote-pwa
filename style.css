@@ -410,8 +410,6 @@ h1 .accent {
 .user-location-marker { display: flex; justify-content: center; align-items: center; pointer-events: none; }
 .user-dot { position: relative; width: 14px; height: 14px; background-color: #3b82f6; border-radius: 50%; border: 2px solid #ffffff; box-shadow: 0 0 10px rgba(59, 130, 246, 0.8); }
 .user-dot::after { content: ''; position: absolute; top: -6px; left: -6px; right: -6px; bottom: -6px; border-radius: 50%; background: rgba(59, 130, 246, 0.4); animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; z-index: -1; }
-.user-heading-container { position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px; pointer-events: none; }
-.user-heading-arrow { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 8px solid #3b82f6; }
 @keyframes pulse-ring { 
     0% { transform: scale(0.6); opacity: 1; } 
     100% { transform: scale(2.5); opacity: 0; } 

@@ -121,11 +121,7 @@ function initMap() {
                 userMarker = L.marker(latlng, {
                     icon: L.divIcon({
                         className: 'user-location-marker',
-                        html: `<div class="user-dot">
-                                 <div class="user-heading-container" style="transform: rotate(${heading}deg);">
-                                    <div class="user-heading-arrow"></div>
-                                 </div>
-                               </div>`,
+                        html: `<div class="user-dot"></div>`,
                         iconSize: [24, 24],
                         iconAnchor: [12, 12]
                     }),
@@ -134,49 +130,11 @@ function initMap() {
                 }).addTo(map);
             } else {
                 userMarker.setLatLng(latlng);
-                const headingEl = userMarker.getElement()?.querySelector('.user-heading-container');
-                if (headingEl) headingEl.style.transform = `rotate(${heading}deg)`;
             }
         }, (err) => {
             console.warn('[App] Geolocation error:', err);
         }, { enableHighAccuracy: true, maximumAge: 0 });
     }
-
-    // Initialize Device Compass for real-time stationary heading
-    let compassInitialized = false;
-    const initCompass = () => {
-        if (compassInitialized) return;
-        
-        const handleOrientation = (event) => {
-            let heading = null;
-            if (event.webkitCompassHeading) {
-                heading = event.webkitCompassHeading; // iOS
-            } else if (event.alpha !== null) {
-                heading = 360 - event.alpha; // Android
-            }
-            
-            if (heading !== null) {
-                const headingEl = document.querySelector('.user-heading-container');
-                if (headingEl) headingEl.style.transform = `rotate(${heading}deg)`;
-            }
-        };
-
-        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-            DeviceOrientationEvent.requestPermission().then(permissionState => {
-                if (permissionState === 'granted') {
-                    window.addEventListener('deviceorientation', handleOrientation);
-                }
-            }).catch(console.warn);
-        } else {
-            window.addEventListener('deviceorientationabsolute', handleOrientation);
-            window.addEventListener('deviceorientation', handleOrientation);
-        }
-        compassInitialized = true;
-    };
-
-    // Request compass permission on the very first tap anywhere on the screen
-    document.body.addEventListener('click', initCompass, { once: true });
-    document.body.addEventListener('touchstart', initCompass, { once: true });
 
     routingControl = L.Routing.control({
         waypoints: [],
