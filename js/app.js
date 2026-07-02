@@ -101,7 +101,7 @@ let lastRouteSummary = null;
 
 // --- MAP & ROUTING ---
 function initMap() {
-    map = L.map('map').setView([39.8283, -98.5795], 4);
+    map = L.map('map', { zoomControl: false }).setView([39.8283, -98.5795], 4);
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
@@ -310,7 +310,7 @@ startDriveBtn.addEventListener('click', async () => {
             driveScreen.classList.add('active');
             window.dispatchEvent(new Event('resize')); // Fix for any canvas/maps
         }, 50);
-    }, 200);
+    }, 400); // Increased to match CSS 0.4s animation time
 
     setUIHandlers({
         onSpeedUpdate: (speed) => {
@@ -346,7 +346,7 @@ stopDriveBtn.addEventListener('click', () => {
             // FIX: Force Leaflet to recalculate map size now that container is visible again
             map.invalidateSize();
         }, 50);
-    }, 200);
+    }, 400); // Increased to match CSS 0.4s animation time
 });
 
 // Boot

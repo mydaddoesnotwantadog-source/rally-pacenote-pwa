@@ -50,12 +50,14 @@ body {
     flex-direction: column;
     height: 100%;
     opacity: 0;
-    transition: opacity 0.2s ease-in-out;
+    transform: scale(0.98) translateY(10px);
+    transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1), transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .screen.active {
     display: flex;
     opacity: 1;
+    transform: scale(1) translateY(0);
 }
 
 /* Rigid Header */
@@ -120,8 +122,9 @@ h1 .accent {
     background: var(--bg-color) !important;
 }
 
-/* Hide Leaflet attribution watermark to prevent clipping with buttons */
-.leaflet-control-attribution {
+/* Hide Leaflet attribution watermark and routing container to prevent UI clutter on mobile */
+.leaflet-control-attribution,
+.leaflet-routing-container {
     display: none !important;
 }
 
@@ -153,12 +156,16 @@ h1 .accent {
     font-weight: 800;
     font-size: 0.8rem;
     cursor: pointer;
-    transition: 0.2s;
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .minimal-btn:hover {
     color: var(--text-primary);
     border-color: var(--text-primary);
+}
+
+.minimal-btn:active {
+    transform: scale(0.92);
 }
 
 /* Drive Stats Grid */
@@ -221,17 +228,25 @@ h1 .accent {
     font-weight: 900;
     letter-spacing: 2px;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    transform-origin: center;
 }
 
 .primary-btn:disabled {
     background: var(--surface-border);
     color: var(--text-secondary);
     cursor: not-allowed;
+    transform: scale(1);
 }
 
 .primary-btn:not(:disabled):hover {
     background: #e60000;
+    box-shadow: 0 4px 15px rgba(255, 42, 42, 0.4);
+}
+
+.primary-btn:not(:disabled):active {
+    transform: scale(0.96);
+    box-shadow: 0 2px 5px rgba(255, 42, 42, 0.4);
 }
 
 .danger-btn {
@@ -242,6 +257,15 @@ h1 .accent {
     font-family: var(--font-heading);
     font-weight: 900;
     cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.danger-btn:hover {
+    background: rgba(255, 42, 42, 0.1);
+}
+
+.danger-btn:active {
+    transform: scale(0.92);
 }
 
 /* Drive Screen Specifics */
