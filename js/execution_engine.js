@@ -17,7 +17,7 @@ if (synth) {
     voices = synth.getVoices();
 }
 
-let activeVoicePack = 'samir'; // default
+let activeVoicePack = 'tts'; // default
 let globalVolume = 1.0;
 const samirPlayer = new Audio();
 let audioCtx = null;

@@ -1,6 +1,6 @@
 import { initDB, saveRouteOffline } from './route_manager.js';
 import { generatePacenotes } from './pacenote_engine.js';
-import { startDrive, stopDrive, setUIHandlers, setMetricState, playAudioCallout, setVolume } from './execution_engine.js';
+import { startDrive, stopDrive, setUIHandlers, setMetricState, playAudioCallout, setVolume, setActiveVoicePack } from './execution_engine.js';
 
 // --- UI ELEMENTS ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -29,6 +29,28 @@ document.addEventListener('DOMContentLoaded', () => {
             setVolume(val);
         });
     }
+
+    // Audio Store Logic
+    const voiceCards = document.querySelectorAll('.voice-pack-card:not(.locked)');
+    voiceCards.forEach(card => {
+        card.addEventListener('click', () => {
+            if (navigator.vibrate) navigator.vibrate(10);
+            
+            // UI Toggle
+            document.querySelectorAll('.voice-pack-card').forEach(c => {
+                c.classList.remove('active');
+                if (!c.classList.contains('locked')) {
+                    c.querySelector('.vp-status').textContent = '[ INSTALLED ]';
+                }
+            });
+            
+            card.classList.add('active');
+            card.querySelector('.vp-status').textContent = '[ ACTIVE ]';
+            
+            // State Update
+            setActiveVoicePack(card.dataset.pack);
+        });
+    });
 });
 
 const setupFlow = document.getElementById('setup-flow');
