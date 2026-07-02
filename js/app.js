@@ -189,9 +189,21 @@ function initMap() {
             styles: [{ color: 'var(--accent-red)', opacity: 0.9, weight: 6 }]
         },
         createMarker: function(i, wp, nWps) {
-            // Create draggable markers that can be deleted on click
+            // Create draggable markers with custom automotive minimalist numbered pins
+            const markerClass = i === 0 ? 'start-pin' : (i === nWps - 1 ? 'end-pin' : 'way-pin');
+            const pinNumber = (i + 1).toString().padStart(2, '0');
+            
             const marker = L.marker(wp.latLng, {
-                draggable: true
+                draggable: true,
+                icon: L.divIcon({
+                    className: `auto-pin ${markerClass}`,
+                    html: `<div class="pin-content">
+                             <span class="pin-number">${pinNumber}</span>
+                             <div class="pin-dot"></div>
+                           </div>`,
+                    iconSize: [24, 40],
+                    iconAnchor: [12, 40]
+                })
             });
             marker.on('click', () => {
                 const waypoints = routingControl.getWaypoints();

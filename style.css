@@ -62,21 +62,45 @@ body {
 
 /* Rigid Header */
 .rigid-header {
-    padding: 24px;
-    border-bottom: 2px solid var(--surface-border);
+    background: var(--surface);
+    padding: 16px 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: var(--bg-color);
-    z-index: 10;
+    gap: 12px;
+    border-bottom: 2px solid var(--surface-border);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    z-index: 100;
+    position: relative;
+}
+
+.version-tag {
+    position: absolute;
+    top: 4px;
+    left: 8px;
+    font-family: var(--font-heading);
+    font-size: 0.55rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: var(--text-secondary);
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.brand {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex-shrink: 1;
 }
 
 .brand h1 {
     font-family: var(--font-heading);
-    font-size: 2.5rem;
+    font-size: clamp(1.2rem, 5vw, 1.8rem);
     font-weight: 900;
-    letter-spacing: -1px;
-    margin-bottom: 4px;
+    letter-spacing: clamp(1px, 2vw, 4px);
+    margin: 0;
+    white-space: nowrap;
 }
 
 h1 .accent {
@@ -388,5 +412,54 @@ h1 .accent {
 .user-dot::after { content: ''; position: absolute; top: -6px; left: -6px; right: -6px; bottom: -6px; border-radius: 50%; background: rgba(59, 130, 246, 0.4); animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; z-index: -1; }
 .user-heading-container { position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px; pointer-events: none; }
 .user-heading-arrow { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 8px solid #3b82f6; }
-@keyframes pulse-ring { 0% { transform: scale(0.6); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
+@keyframes pulse-ring { 
+    0% { transform: scale(0.6); opacity: 1; } 
+    100% { transform: scale(2.5); opacity: 0; } 
+}
 
+/* Automotive Minimalist Map Pins */
+.auto-pin {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+}
+.pin-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform: translateY(0);
+    transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.auto-pin:hover .pin-content {
+    transform: translateY(-5px);
+}
+.pin-number {
+    background: var(--surface);
+    color: var(--text-primary);
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    font-weight: 900;
+    padding: 2px 6px;
+    border: 1px solid var(--surface-border);
+    border-radius: 2px;
+    margin-bottom: 4px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+.start-pin .pin-number {
+    color: #fff;
+    background: #2ecc71;
+    border-color: #27ae60;
+}
+.end-pin .pin-number {
+    color: #fff;
+    background: var(--accent-red);
+    border-color: #c0392b;
+}
+.pin-dot {
+    width: 6px;
+    height: 6px;
+    background: #fff;
+    border-radius: 50%;
+    border: 2px solid var(--surface);
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
