@@ -1,0 +1,106 @@
+// execution_engine.js
+let watchId = null;
+let currentRoute = null;
+let upcomingPacenotes = [];
+let currentNoteIndex = 0;
+let isMetric = true;
+
+let uiCallbacks = {};
+
+export function setMetricState(state) {
+    isMetric = state;
+}
+
+export function setUIHandlers(handlers) {
+    uiCallbacks = handlers;
+}
+
+export function startDrive(routeData, pacenotesData) {
+    currentRoute = routeData;
+    upcomingPacenotes = pacenotesData;
+    currentNoteIndex = 0;
+
+    if (uiCallbacks.onNextUpdate && upcomingPacenotes[0]) {
+        uiCallbacks.onNextUpdate(upcomingPacenotes[0].callout);
+    }
+
+    if ('geolocation' in navigator) {
+        watchId = navigator.geolocation.watchPosition(
+            handleLocationUpdate,
+            handleLocationError,
+            { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
+        );
+    }
+}
+
+export function stopDrive() {
+    if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+    }
+}
+
+function handleLocationUpdate(position) {
+    const coords = position.coords;
+    const speedMs = coords.speed || 0;
+    
+    // 1 m/s = 3.6 km/h, 1 m/s = 2.23694 mph
+    const speedFormatted = isMetric ? Math.round(speedMs * 3.6) : Math.round(speedMs * 2.23694);
+
+    if (uiCallbacks.onSpeedUpdate) uiCallbacks.onSpeedUpdate(speedFormatted);
+
+    if (currentNoteIndex >= upcomingPacenotes.length) {
+        if (uiCallbacks.onCalloutTrigger) uiCallbacks.onCalloutTrigger('FINISH');
+        stopDrive();
+        return;
+    }
+
+    const nextNote = upcomingPacenotes[currentNoteIndex];
+    
+    const distanceToTurn = Math.round(calculateDistance(
+        coords.latitude, coords.longitude,
+        nextNote.lat, nextNote.lon
+    ));
+
+    const distFormatted = isMetric ? distanceToTurn : Math.round(distanceToTurn * 1.09361);
+    if (uiCallbacks.onDistanceUpdate) uiCallbacks.onDistanceUpdate(distFormatted);
+
+    const triggerDistance = Math.max(30, speedMs * 4);
+
+    if (distanceToTurn <= triggerDistance) {
+        if (uiCallbacks.onCalloutTrigger) uiCallbacks.onCalloutTrigger(nextNote.callout);
+        playAudioCallout(nextNote.callout);
+        
+        currentNoteIndex++;
+        if (uiCallbacks.onNextUpdate && upcomingPacenotes[currentNoteIndex]) {
+            uiCallbacks.onNextUpdate(upcomingPacenotes[currentNoteIndex].callout);
+        } else if (uiCallbacks.onNextUpdate) {
+            uiCallbacks.onNextUpdate('Finish Line');
+        }
+    }
+}
+
+function handleLocationError(error) {
+    console.warn(`[Engine] Geolocation error: ${error.message}`);
+}
+
+function playAudioCallout(calloutText) {
+    const filename = calloutText.toLowerCase().replace(' ', '_') + '.m4a';
+    const filepath = `/audio/${filename}`;
+    const audio = new Audio(filepath);
+    audio.play().catch(e => console.warn('Audio play failed, awaiting user interaction.'));
+}
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371e3;
+    const phi1 = lat1 * Math.PI / 180;
+    const phi2 = lat2 * Math.PI / 180;
+    const deltaPhi = (lat2 - lat1) * Math.PI / 180;
+    const deltaLambda = (lon2 - lon1) * Math.PI / 180;
+
+    const a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+              Math.cos(phi1) * Math.cos(phi2) *
+              Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+}
