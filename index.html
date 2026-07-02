@@ -22,8 +22,38 @@
 <body>
     <main class="app-container">
         
-        <!-- SETUP SCREEN -->
-        <section id="setup-screen" class="screen active">
+        <!-- SETUP & SHOP FLOW -->
+        <section id="setup-flow" class="screen active">
+            <div id="vertical-pager" class="vertical-pager">
+                
+                <!-- SHOP SCREEN (Top) -->
+                <div id="shop-screen" class="pager-screen">
+                    <header class="rigid-header shop-header">
+                        <div class="brand">
+                            <h1>AUDIO<span class="accent">//</span>STORE</h1>
+                        </div>
+                    </header>
+                    <div class="shop-content">
+                        <div class="voice-pack-card active">
+                            <div class="vp-title">BASIC TTS</div>
+                            <div class="vp-status">[ INSTALLED ]</div>
+                        </div>
+                        <div class="voice-pack-card locked">
+                            <div class="vp-title">RALLY PRO</div>
+                            <div class="vp-status">[ LOCKED ]</div>
+                        </div>
+                        <div class="voice-pack-card coming-soon">
+                            <div class="vp-title">SAMIR</div>
+                            <div class="vp-status">[ COMING SOON ]</div>
+                        </div>
+                        <div style="flex-grow: 1;"></div>
+                        <div class="swipe-hint swipe-up">SWIPE UP TO RETURN //</div>
+                    </div>
+                </div>
+
+                <!-- SETUP SCREEN (Bottom) -->
+                <div id="setup-screen-content" class="pager-screen">
+                    <div class="swipe-hint swipe-down">// SWIPE DOWN FOR AUDIO STORE</div>
             <header class="rigid-header">
                 <div class="version-tag">v1.0.17</div>
                 <div class="brand">
@@ -73,6 +103,8 @@
             </div>
 
             <button id="start-drive-btn" class="primary-btn" disabled>INITIATE DRIVE</button>
+                </div> <!-- End setup-screen-content -->
+            </div> <!-- End vertical-pager -->
         </section>
 
         <!-- DRIVE SCREEN -->

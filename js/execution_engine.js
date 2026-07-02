@@ -8,6 +8,15 @@ let previousDistance = Infinity;
 
 let uiCallbacks = {};
 
+// TTS Engine Setup
+const synth = window.speechSynthesis;
+let voices = [];
+if (synth) {
+    // Populate voices when they load
+    synth.onvoiceschanged = () => { voices = synth.getVoices(); };
+    voices = synth.getVoices();
+}
+
 export function setMetricState(state) {
     isMetric = state;
 }
@@ -103,10 +112,25 @@ function handleLocationError(error) {
 }
 
 function playAudioCallout(calloutText) {
-    const filename = calloutText.toLowerCase().replace(' ', '_') + '.m4a';
-    const filepath = `/audio/${filename}`;
-    const audio = new Audio(filepath);
-    audio.play().catch(e => console.warn('Audio play failed, awaiting user interaction.'));
+    if (!synth) return;
+
+    // Use Web Speech API for the "Basic TTS" pack
+    const utterance = new SpeechSynthesisUtterance(calloutText);
+    
+    // Tuning for urgent rally pace
+    utterance.rate = 1.35; 
+    utterance.pitch = 1.0;
+    
+    // Attempt to find a high-quality English voice, preferring concise synthetic ones
+    if (voices.length > 0) {
+        const preferredVoice = voices.find(v => v.lang.startsWith('en-') && (v.name.includes('Google') || v.name.includes('Siri'))) || voices.find(v => v.lang.startsWith('en-'));
+        if (preferredVoice) {
+            utterance.voice = preferredVoice;
+        }
+    }
+    
+    // Play immediately
+    synth.speak(utterance);
 }
 
 function calculateDistance(lat1, lon1, lat2, lon2) {

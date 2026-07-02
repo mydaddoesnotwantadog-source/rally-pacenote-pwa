@@ -3,7 +3,15 @@ import { generatePacenotes } from './pacenote_engine.js';
 import { startDrive, stopDrive, setUIHandlers, setMetricState } from './execution_engine.js';
 
 // --- UI ELEMENTS ---
-const setupScreen = document.getElementById('setup-screen');
+document.addEventListener('DOMContentLoaded', () => {
+    const pager = document.getElementById('vertical-pager');
+    const setupContent = document.getElementById('setup-screen-content');
+    if (pager && setupContent) {
+        pager.scrollTop = setupContent.offsetTop;
+    }
+});
+
+const setupFlow = document.getElementById('setup-flow');
 const driveScreen = document.getElementById('drive-screen');
 const uploadStatus = document.getElementById('upload-status');
 const startDriveBtn = document.getElementById('start-drive-btn');
@@ -266,15 +274,13 @@ clearRouteBtn.addEventListener('click', () => {
 startDriveBtn.addEventListener('click', async () => {
     if (!currentRouteData || !generatedNotes) return;
 
-    if ('wakeLock' in navigator) {
-        try {
-            wakeLock = await navigator.wakeLock.request('screen');
-        } catch (err) {}
+    if (wakeLock === null && 'wakeLock' in navigator) {
+        navigator.wakeLock.request('screen').then(lock => { wakeLock = lock; }).catch(console.warn);
     }
 
-    setupScreen.classList.remove('active');
+    setupFlow.classList.remove('active');
     setTimeout(() => {
-        setupScreen.style.display = 'none';
+        setupFlow.style.display = 'none';
         driveScreen.style.display = 'flex';
         setTimeout(() => {
             driveScreen.classList.add('active');
@@ -310,9 +316,9 @@ stopDriveBtn.addEventListener('click', () => {
     driveScreen.classList.remove('active');
     setTimeout(() => {
         driveScreen.style.display = 'none';
-        setupScreen.style.display = 'flex';
+        setupFlow.style.display = 'flex';
         setTimeout(() => {
-            setupScreen.classList.add('active');
+            setupFlow.classList.add('active');
             // FIX: Force Leaflet to recalculate map size now that container is visible again
             map.invalidateSize();
         }, 50);

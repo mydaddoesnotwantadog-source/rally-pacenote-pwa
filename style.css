@@ -37,9 +37,34 @@ body {
 
 .app-container {
     width: 100%;
-    max-width: 500px;
     height: 100vh;
-    position: relative;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* vertical-pager handles scrolling */
+}
+
+/* Vertical Pager for iOS Native Swipe */
+.vertical-pager {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+    display: flex;
+    flex-direction: column;
+}
+
+.vertical-pager::-webkit-scrollbar {
+    display: none; /* Invisible scrollbar for native feel */
+}
+
+.pager-screen {
+    width: 100%;
+    height: 100%;
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
     display: flex;
     flex-direction: column;
 }
@@ -103,6 +128,65 @@ body {
     white-space: nowrap;
 }
 
+/* Swipe Hints */
+.swipe-hint {
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: var(--text-secondary);
+    padding: 16px 0;
+    opacity: 0.6;
+    animation: bounce-y 2s infinite;
+}
+@keyframes bounce-y {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(5px); }
+}
+
+/* Shop UI */
+.shop-content {
+    flex: 1;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: var(--bg-color);
+}
+.voice-pack-card {
+    background: var(--surface);
+    border: 2px solid var(--surface-border);
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+.voice-pack-card.active {
+    border-color: var(--accent-red);
+    box-shadow: 0 0 15px rgba(255, 42, 42, 0.2);
+}
+.voice-pack-card.locked {
+    opacity: 0.5;
+    filter: grayscale(100%);
+}
+.vp-title {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+}
+.vp-status {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--text-secondary);
+}
+.voice-pack-card.active .vp-status {
+    color: var(--accent-red);
+}
+
+/* Map Containers */
 h1 .accent {
     color: var(--accent-red);
 }
