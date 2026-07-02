@@ -67,8 +67,7 @@ body {
     scroll-snap-stop: always;
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden; /* Fix: No nested scrollbars to break swipe logic */
 }
 
 /* Screens */
@@ -190,7 +189,10 @@ body {
 
 /* Audio Preview UI */
 .preview-content {
-    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
 }
 .preview-dashboard {
     display: flex;
@@ -214,9 +216,9 @@ body {
     background: var(--surface);
     color: var(--text-primary);
     border: 2px solid var(--surface-border);
-    padding: 14px;
+    padding: 10px;
     font-family: var(--font-heading);
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 900;
     letter-spacing: 2px;
     cursor: pointer;
@@ -266,7 +268,8 @@ h1 .accent {
 /* Map Container */
 .map-container {
     position: relative;
-    height: 350px;
+    flex: 0 1 350px; /* Allow shrinking so it doesn't force a scrollbar */
+    min-height: 150px;
     width: 100%;
     border-bottom: 2px solid var(--surface-border);
 }
