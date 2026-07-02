@@ -105,10 +105,37 @@ function initMap() {
         maxZoom: 19
     }).addTo(map);
 
+    let userMarker = null;
+
     if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((pos) => {
-            map.setView([pos.coords.latitude, pos.coords.longitude], 13);
-        });
+        navigator.geolocation.watchPosition((pos) => {
+            const latlng = [pos.coords.latitude, pos.coords.longitude];
+            const heading = pos.coords.heading || 0;
+            
+            if (!userMarker) {
+                map.setView(latlng, 13);
+                userMarker = L.marker(latlng, {
+                    icon: L.divIcon({
+                        className: 'user-location-marker',
+                        html: `<div class="user-dot">
+                                 <div class="user-heading-container" style="transform: rotate(${heading}deg);">
+                                    <div class="user-heading-arrow"></div>
+                                 </div>
+                               </div>`,
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 12]
+                    }),
+                    interactive: false,
+                    zIndexOffset: 1000
+                }).addTo(map);
+            } else {
+                userMarker.setLatLng(latlng);
+                const headingEl = userMarker.getElement()?.querySelector('.user-heading-container');
+                if (headingEl) headingEl.style.transform = `rotate(${heading}deg)`;
+            }
+        }, (err) => {
+            console.warn('[App] Geolocation error:', err);
+        }, { enableHighAccuracy: true, maximumAge: 0 });
     }
 
     routingControl = L.Routing.control({
