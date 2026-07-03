@@ -45,6 +45,11 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Re-trigger resize to ensure Leaflet renders correctly
             window.dispatchEvent(new Event('resize'));
+            setTimeout(() => {
+                import('./execution_engine.js').then(module => {
+                    if (module.invalidateDriveMap) module.invalidateDriveMap();
+                });
+            }, 50);
         });
     }
 

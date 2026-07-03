@@ -42,6 +42,12 @@ export function setMetricState(state) {
     isMetric = state;
 }
 
+export function invalidateDriveMap() {
+    if (driveMap) {
+        driveMap.invalidateSize();
+    }
+}
+
 export function setUIHandlers(handlers) {
     uiCallbacks = handlers;
 }
