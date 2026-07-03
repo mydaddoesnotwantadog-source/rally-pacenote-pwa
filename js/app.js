@@ -156,10 +156,34 @@ async function initApp() {
 
     // Setup Unit Toggle
     unitToggleContainer.addEventListener('click', () => {
-        // Satisfying physical vibration feedback if on mobile
         if (navigator.vibrate) navigator.vibrate(40);
         setUnits(!isMetric);
     });
+
+    const sensorAuthBtn = document.getElementById('sensor-auth-btn');
+    if (sensorAuthBtn) {
+        sensorAuthBtn.addEventListener('click', async () => {
+            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                try {
+                    const permissionState = await DeviceMotionEvent.requestPermission();
+                    if (permissionState === 'granted') {
+                        sensorAuthBtn.style.color = 'var(--accent-green)';
+                        sensorAuthBtn.style.borderColor = 'var(--accent-green)';
+                        sensorAuthBtn.textContent = 'SNSR: OK';
+                    } else {
+                        sensorAuthBtn.style.color = 'var(--accent-red)';
+                        sensorAuthBtn.style.borderColor = 'var(--accent-red)';
+                    }
+                } catch (e) {
+                    console.warn(e);
+                }
+            } else {
+                sensorAuthBtn.style.color = 'var(--accent-green)';
+                sensorAuthBtn.style.borderColor = 'var(--accent-green)';
+                sensorAuthBtn.textContent = 'SNSR: ON';
+            }
+        });
+    }
 
     initMap();
 }
@@ -388,6 +412,17 @@ startDriveBtn.addEventListener('click', async () => {
         },
         onNextUpdate: (nextCallout) => {
             document.getElementById('next-callout').textContent = nextCallout;
+        },
+        onGPSStatusUpdate: (status) => {
+            const statusEl = document.getElementById('gps-status-indicator');
+            if (statusEl) {
+                statusEl.textContent = `GPS: ${status}`;
+                if (status === 'SNAPPED') {
+                    statusEl.style.color = 'var(--accent-green)';
+                } else {
+                    statusEl.style.color = 'var(--accent-red)';
+                }
+            }
         }
     });
 

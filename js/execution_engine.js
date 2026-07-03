@@ -1,5 +1,8 @@
 // execution_engine.js
+import { resetGPSEngine, processGPSUpdate, processAccelerationUpdate } from './gps_engine.js';
+
 let watchId = null;
+let accelHandler = null;
 let currentRoute = null;
 let upcomingPacenotes = [];
 let currentNoteIndex = 0;
@@ -116,12 +119,26 @@ export function startDrive(routeData, pacenotesData) {
         uiCallbacks.onNextUpdate(upcomingPacenotes[0].callout);
     }
 
+    resetGPSEngine();
+
     if ('geolocation' in navigator) {
         watchId = navigator.geolocation.watchPosition(
             handleLocationUpdate,
             handleLocationError,
             { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
         );
+    }
+
+    if (window.DeviceMotionEvent) {
+        accelHandler = (event) => {
+            const acc = event.acceleration; // excluding gravity
+            if (acc && acc.y !== null && acc.x !== null) {
+                // Forward/Backward usually Y, Left/Right usually X
+                // Requires the phone to be upright.
+                processAccelerationUpdate(acc.y, acc.x, lastHeading, Date.now());
+            }
+        };
+        window.addEventListener('devicemotion', accelHandler);
     }
 }
 
@@ -130,11 +147,21 @@ export function stopDrive() {
         navigator.geolocation.clearWatch(watchId);
         watchId = null;
     }
+    if (accelHandler !== null) {
+        window.removeEventListener('devicemotion', accelHandler);
+        accelHandler = null;
+    }
 }
 
 function handleLocationUpdate(position) {
-    const coords = position.coords;
-    const speedMs = coords.speed || 0;
+    // Pipe raw location through aerospace Kalman filter & Route Snapper
+    const processed = processGPSUpdate(position, currentRoute);
+
+    if (uiCallbacks.onGPSStatusUpdate) {
+        uiCallbacks.onGPSStatusUpdate(processed.status);
+    }
+
+    const speedMs = processed.speed || 0;
     
     // 1 m/s = 3.6 km/h, 1 m/s = 2.23694 mph
     const speedFormatted = isMetric ? Math.round(speedMs * 3.6) : Math.round(speedMs * 2.23694);
@@ -143,9 +170,9 @@ function handleLocationUpdate(position) {
 
     // Update Drive Map Camera
     if (driveMap) {
-        driveMap.panTo([coords.latitude, coords.longitude], { animate: true, duration: 0.5 });
+        driveMap.panTo([processed.lat, processed.lon], { animate: true, duration: 0.5 });
         
-        let heading = coords.heading;
+        let heading = processed.heading;
         if (heading === null || isNaN(heading)) {
             heading = lastHeading; // Keep last heading when stopped
         } else {
@@ -168,7 +195,7 @@ function handleLocationUpdate(position) {
     const nextNote = upcomingPacenotes[currentNoteIndex];
     
     const distanceToTurn = Math.round(calculateDistance(
-        coords.latitude, coords.longitude,
+        processed.lat, processed.lon,
         nextNote.lat, nextNote.lon
     ));
 

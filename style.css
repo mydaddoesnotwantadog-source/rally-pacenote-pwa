@@ -115,6 +115,20 @@ body {
     color: var(--text-secondary);
     opacity: 0.4;
     pointer-events: none;
+    z-index: 1000;
+}
+
+.overlay-buttons {
+    display: flex;
+    gap: 8px;
+    pointer-events: auto;
+}
+
+.status-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex-shrink: 1;
 }
 
 .brand {

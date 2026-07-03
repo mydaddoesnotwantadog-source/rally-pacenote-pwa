@@ -55,7 +55,7 @@
                 <div id="setup-screen-content" class="pager-screen">
                     <div class="swipe-hint swipe-down">// SWIPE DOWN FOR AUDIO STORE</div>
             <header class="rigid-header">
-                <div class="version-tag">v1.0.29</div>
+                <div class="version-tag">v1.0.30</div>
                 <div class="brand">
                     <h1>RALLY<span class="accent">//</span>NODE</h1>
                     <div class="system-status">
@@ -74,7 +74,10 @@
                 <div id="map"></div>
                 <div class="map-overlay">
                     <p id="upload-status" class="status-text">AWAITING ROUTE INPUT...</p>
-                    <button id="clear-route-btn" class="minimal-btn">CLR</button>
+                    <div class="overlay-buttons">
+                        <button id="sensor-auth-btn" class="minimal-btn">SNSR</button>
+                        <button id="clear-route-btn" class="minimal-btn">CLR</button>
+                    </div>
                 </div>
             </div>
 
@@ -176,6 +179,7 @@
                 <div class="speed-box">
                     <span class="speed-value" id="current-speed">0</span>
                     <span class="speed-unit">MPH</span>
+                    <div id="gps-status-indicator" style="font-size: 0.6rem; font-weight: 800; margin-top: 4px; color: var(--accent-red); letter-spacing: 1px;">GPS: RAW</div>
                 </div>
                 
                 <div class="view-toggle">
