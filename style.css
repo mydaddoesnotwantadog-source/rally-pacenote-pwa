@@ -59,6 +59,10 @@ body {
     display: none; /* Invisible scrollbar for native feel */
 }
 
+.hidden {
+    display: none !important;
+}
+
 .pager-screen {
     width: 100%;
     height: 100%;

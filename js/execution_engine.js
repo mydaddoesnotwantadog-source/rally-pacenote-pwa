@@ -60,6 +60,7 @@ export function startDrive(routeData, pacenotesData) {
 
     // Initialize Drive Map if needed
     if (!driveMap) {
+        const startCoord = routeData.coordinates[0] || {lat: 0, lng: 0};
         driveMap = L.map('drive-map', {
             zoomControl: false,
             dragging: false,
@@ -68,7 +69,7 @@ export function startDrive(routeData, pacenotesData) {
             doubleClickZoom: false,
             boxZoom: false,
             keyboard: false
-        }).setView([0, 0], 18);
+        }).setView([startCoord.lat, startCoord.lng], 18);
 
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; CartoDB',
