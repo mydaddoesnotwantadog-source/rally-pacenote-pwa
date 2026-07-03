@@ -182,7 +182,8 @@ export function generatePacenotes(route) {
             lon: cluster.nodes[0].lon,
             distanceBeforeTurn: Math.round(distToStart),
             angle: cluster.totalAngle,
-            callout: calloutStr
+            callout: calloutStr,
+            severityRank: maxRank
         });
 
         prevClusterEndIndex = cluster.nodes[cluster.nodes.length - 1].index;

@@ -641,3 +641,81 @@ h1 .accent {
     border: 2px solid var(--surface);
     box-shadow: 0 0 5px rgba(0,0,0,0.5);
 }
+/* --------------------------
+ * DRIVE MAP & CAMERA
+ * -------------------------- */
+
+.view-toggle {
+    display: flex;
+    background: var(--surface);
+    border: 2px solid var(--surface-border);
+    padding: 4px;
+    gap: 4px;
+}
+
+.toggle-btn {
+    background: transparent;
+    border: none;
+    color: var(--surface-border);
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 900;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.toggle-btn.active {
+    background: var(--text-primary);
+    color: var(--bg-color);
+}
+
+#drive-map-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    z-index: 1; /* Below UI */
+    background: var(--bg-color);
+}
+
+#drive-map {
+    position: absolute;
+    /* Oversized to hide corners when rotating */
+    width: 150vw;
+    height: 150vh;
+    left: -25vw;
+    top: -25vh;
+    transform-origin: center center;
+    /* Smooth CSS transition for the trailing camera */
+    transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Ensure Leaflet controls don't show up on drive map */
+#drive-map .leaflet-control-container {
+    display: none;
+}
+
+#car-marker {
+    position: absolute;
+    left: 50%;
+    /* Bottom 30% of screen */
+    top: 70%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+}
+
+#drive-text-ui {
+    position: relative;
+    z-index: 2; /* Above map */
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+#drive-screen .top-bar {
+    z-index: 10;
+}

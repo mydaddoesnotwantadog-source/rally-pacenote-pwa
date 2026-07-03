@@ -24,6 +24,9 @@ let audioCtx = null;
 let gainNode = null;
 let sourceNode = null;
 
+let driveMap = null;
+let lastHeading = 0;
+
 export function setVolume(vol) {
     globalVolume = parseFloat(vol);
     if (gainNode) {
@@ -48,6 +51,58 @@ export function startDrive(routeData, pacenotesData) {
     upcomingPacenotes = pacenotesData;
     currentNoteIndex = 0;
     previousDistance = Infinity;
+
+    // Initialize Drive Map if needed
+    if (!driveMap) {
+        driveMap = L.map('drive-map', {
+            zoomControl: false,
+            dragging: false,
+            touchZoom: false,
+            scrollWheelZoom: false,
+            doubleClickZoom: false,
+            boxZoom: false,
+            keyboard: false
+        }).setView([0, 0], 18);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; CartoDB',
+            maxZoom: 20
+        }).addTo(driveMap);
+    }
+    
+    // Clear previous layers
+    driveMap.eachLayer((layer) => {
+        if (layer instanceof L.Polyline || layer instanceof L.CircleMarker) {
+            driveMap.removeLayer(layer);
+        }
+    });
+
+    // Draw route polyline
+    const routeCoords = routeData.coordinates.map(c => [c.lat, c.lng]);
+    L.polyline(routeCoords, {
+        color: 'rgba(255, 255, 255, 0.4)',
+        weight: 8,
+        lineCap: 'round',
+        lineJoin: 'round'
+    }).addTo(driveMap);
+
+    // Draw pacenotes with severity color coding
+    // 1-2=Green (Flat/Easy), 3-4=Yellow (Medium), 5-6=Red (Sharp), 7=Black (Hairpin)
+    upcomingPacenotes.forEach(note => {
+        let color = '#00FF00'; 
+        if (note.severityRank === 3 || note.severityRank === 4) color = '#FFA500';
+        else if (note.severityRank === 5 || note.severityRank === 6) color = '#FF0000';
+        else if (note.severityRank >= 7) color = '#000000';
+
+        L.circleMarker([note.lat, note.lon], {
+            radius: 8,
+            fillColor: color,
+            color: '#ffffff',
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 1
+        }).addTo(driveMap);
+    });
 
     if (uiCallbacks.onNextUpdate && upcomingPacenotes[0]) {
         uiCallbacks.onNextUpdate(upcomingPacenotes[0].callout);
@@ -77,6 +132,24 @@ function handleLocationUpdate(position) {
     const speedFormatted = isMetric ? Math.round(speedMs * 3.6) : Math.round(speedMs * 2.23694);
 
     if (uiCallbacks.onSpeedUpdate) uiCallbacks.onSpeedUpdate(speedFormatted);
+
+    // Update Drive Map Camera
+    if (driveMap) {
+        driveMap.panTo([coords.latitude, coords.longitude], { animate: true, duration: 0.5 });
+        
+        let heading = coords.heading;
+        if (heading === null || isNaN(heading)) {
+            heading = lastHeading; // Keep last heading when stopped
+        } else {
+            lastHeading = heading;
+        }
+        
+        const mapContainer = document.getElementById('drive-map');
+        if (mapContainer) {
+            // Rotate opposite to heading to keep forward=UP, translate down for trailing view
+            mapContainer.style.transform = `rotate(${-heading}deg) translateY(15vh)`;
+        }
+    }
 
     if (currentNoteIndex >= upcomingPacenotes.length) {
         if (uiCallbacks.onCalloutTrigger) uiCallbacks.onCalloutTrigger('FINISH');

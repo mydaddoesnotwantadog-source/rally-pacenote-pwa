@@ -55,7 +55,7 @@
                 <div id="setup-screen-content" class="pager-screen">
                     <div class="swipe-hint swipe-down">// SWIPE DOWN FOR AUDIO STORE</div>
             <header class="rigid-header">
-                <div class="version-tag">v1.0.23</div>
+                <div class="version-tag">v1.0.24</div>
                 <div class="brand">
                     <h1>RALLY<span class="accent">//</span>NODE</h1>
                     <div class="system-status">
@@ -162,22 +162,40 @@
 
         <!-- DRIVE SCREEN -->
         <section id="drive-screen" class="screen">
+            
+            <div id="drive-map-wrapper" class="hidden">
+                <div id="drive-map"></div>
+                <div id="car-marker">
+                    <svg viewBox="0 0 24 24" width="48" height="48">
+                        <path d="M12 2L2 22l10-4 10 4L12 2z" fill="#ff2a2a" stroke="#0a0a0a" stroke-width="2"/>
+                    </svg>
+                </div>
+            </div>
+
             <div class="top-bar">
                 <div class="speed-box">
                     <span class="speed-value" id="current-speed">0</span>
                     <span class="speed-unit">MPH</span>
                 </div>
+                
+                <div class="view-toggle">
+                    <button id="toggle-text" class="toggle-btn active">TXT</button>
+                    <button id="toggle-map" class="toggle-btn">MAP</button>
+                </div>
+
                 <button id="stop-drive-btn" class="danger-btn">ABORT</button>
             </div>
 
-            <div class="pacenote-display">
-                <h2 class="distance-value" id="distance-to-turn">---</h2>
-                <span class="distance-unit" id="distance-unit">METERS TO</span>
-                <div class="turn-callout" id="current-callout">STANDBY</div>
-            </div>
+            <div id="drive-text-ui">
+                <div class="pacenote-display">
+                    <h2 class="distance-value" id="distance-to-turn">---</h2>
+                    <span class="distance-unit" id="distance-unit">METERS TO</span>
+                    <div class="turn-callout" id="current-callout">STANDBY</div>
+                </div>
 
-            <div class="upcoming-notes">
-                <p>NXT <span class="accent">//</span> <span id="next-callout">---</span></p>
+                <div class="upcoming-notes">
+                    <p>NXT <span class="accent">//</span> <span id="next-callout">---</span></p>
+                </div>
             </div>
         </section>
 

@@ -11,6 +11,43 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Audio Preview Logic
+    const stopDriveBtn = document.getElementById('stop-drive-btn');
+    if (stopDriveBtn) {
+        stopDriveBtn.addEventListener('click', () => {
+            if (navigator.vibrate) navigator.vibrate(50);
+            stopDrive();
+            driveScreen.classList.remove('active');
+            setupFlow.classList.add('active');
+        });
+    }
+
+    // Drive View Toggle
+    const toggleText = document.getElementById('toggle-text');
+    const toggleMap = document.getElementById('toggle-map');
+    const textUI = document.getElementById('drive-text-ui');
+    const mapWrapper = document.getElementById('drive-map-wrapper');
+
+    if (toggleText && toggleMap) {
+        toggleText.addEventListener('click', () => {
+            if (navigator.vibrate) navigator.vibrate(10);
+            toggleText.classList.add('active');
+            toggleMap.classList.remove('active');
+            textUI.classList.remove('hidden');
+            mapWrapper.classList.add('hidden');
+        });
+        
+        toggleMap.addEventListener('click', () => {
+            if (navigator.vibrate) navigator.vibrate(10);
+            toggleMap.classList.add('active');
+            toggleText.classList.remove('active');
+            mapWrapper.classList.remove('hidden');
+            textUI.classList.add('hidden');
+            
+            // Re-trigger resize to ensure Leaflet renders correctly
+            window.dispatchEvent(new Event('resize'));
+        });
+    }
+
     const previewBtns = document.querySelectorAll('.preview-btn');
     previewBtns.forEach(btn => {
         btn.addEventListener('click', () => {
