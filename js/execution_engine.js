@@ -60,7 +60,8 @@ export function startDrive(routeData, pacenotesData) {
 
     // Initialize Drive Map if needed
     if (!driveMap) {
-        const startCoord = routeData.coordinates[0] || {lat: 0, lng: 0};
+        // routeData is an array of {lat, lon}
+        const startCoord = (routeData && routeData.length > 0) ? routeData[0] : {lat: 0, lon: 0};
         driveMap = L.map('drive-map', {
             zoomControl: false,
             dragging: false,
@@ -85,7 +86,7 @@ export function startDrive(routeData, pacenotesData) {
     });
 
     // Draw route polyline
-    const routeCoords = routeData.coordinates.map(c => [c.lat, c.lng]);
+    const routeCoords = routeData.map(c => [c.lat, c.lon]);
     L.polyline(routeCoords, {
         color: 'rgba(255, 255, 255, 0.4)',
         weight: 8,
