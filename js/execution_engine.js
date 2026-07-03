@@ -70,7 +70,7 @@ export function startDrive(routeData, pacenotesData) {
             doubleClickZoom: false,
             boxZoom: false,
             keyboard: false
-        }).setView([startCoord.lat, startCoord.lng], 18);
+        }).setView([startCoord.lat, startCoord.lon], 18);
 
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; CartoDB',
