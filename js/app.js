@@ -222,7 +222,9 @@ function initMap() {
         dragging: true,
         touchZoom: true,
         scrollWheelZoom: true,
-        doubleClickZoom: true
+        doubleClickZoom: true,
+        rotate: true,
+        touchRotate: true
     }).setView([39.8283, -98.5795], 4);
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
@@ -417,10 +419,13 @@ function initMap() {
         routingControl.setWaypoints(waypoints);
     });
 
-    setupBottomSheetLogic();
+    setupBottomSheetLogic(() => {
+        isUserExitedFullscreen = true;
+        exitFullscreenMap();
+    });
 }
 
-function setupBottomSheetLogic() {
+function setupBottomSheetLogic(onExitFullscreen) {
     const bottomSheet = document.getElementById('setup-bottom-sheet');
     const dragHandle = document.querySelector('.drag-handle-container');
     
@@ -468,9 +473,8 @@ function setupBottomSheetLogic() {
         let delta = currentY - startY;
         
         // If dragging up sufficiently, exit fullscreen
-        if (delta < -50) {
-            isUserExitedFullscreen = true;
-            exitFullscreenMap();
+        if (delta < -50 && onExitFullscreen) {
+            onExitFullscreen();
         }
     });
 }
