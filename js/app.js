@@ -333,11 +333,13 @@ function initMap() {
         const waypoints = e.waypoints.filter(w => w.latLng !== null);
         const mapContainer = document.querySelector('.map-container');
         const bottomSheet = document.getElementById('setup-bottom-sheet');
+        const verticalPager = document.getElementById('vertical-pager');
         
         if (waypoints.length >= 1) {
             if (!mapContainer.classList.contains('map-fullscreen')) {
                 mapContainer.classList.add('map-fullscreen');
                 bottomSheet.classList.add('fullscreen-mode');
+                verticalPager.classList.add('no-scroll');
                 
                 document.querySelector('.system-status').style.opacity = '0';
                 document.getElementById('unit-toggle').style.opacity = '0';
@@ -356,6 +358,7 @@ function initMap() {
             mapContainer.classList.remove('map-fullscreen');
             bottomSheet.classList.remove('fullscreen-mode');
             bottomSheet.classList.remove('expanded');
+            verticalPager.classList.remove('no-scroll');
             
             document.querySelector('.system-status').style.display = '';
             document.getElementById('unit-toggle').style.display = '';

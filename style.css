@@ -59,6 +59,10 @@ body {
     display: none; /* Invisible scrollbar for native feel */
 }
 
+.vertical-pager.no-scroll {
+    overflow-y: hidden !important;
+}
+
 .hidden {
     display: none !important;
 }
