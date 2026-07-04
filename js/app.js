@@ -218,6 +218,7 @@ let lastRouteSummary = null;
 // --- MAP & ROUTING ---
 function initMap() {
     map = L.map('map', { 
+        preferCanvas: true,
         zoomControl: false,
         dragging: true,
         touchZoom: true,
