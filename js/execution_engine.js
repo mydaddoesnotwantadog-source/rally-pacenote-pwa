@@ -160,8 +160,10 @@ function handleLocationUpdate(position) {
         
         const mapContainer = document.getElementById('drive-map');
         if (mapContainer) {
-            // Rotate opposite to heading to keep forward=UP, translate down for trailing view
-            mapContainer.style.transform = `rotate(${-heading}deg) translateY(15vh)`;
+            // Translate down so the map's GPS center aligns with the trailing car marker
+            // Pitch 60deg for 3D chase cam view
+            // Rotate opposite to heading to keep forward=UP
+            mapContainer.style.transform = `translateY(15vh) rotateX(60deg) rotateZ(${-heading}deg)`;
         }
     }
 

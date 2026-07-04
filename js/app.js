@@ -1,6 +1,6 @@
 import { initDB, saveRouteOffline } from './route_manager.js';
 import { generatePacenotes } from './pacenote_engine.js';
-import { startDrive, stopDrive, setUIHandlers, setMetricState, playAudioCallout, setVolume, setActiveVoicePack } from './execution_engine.js';
+import { startDrive, stopDrive, setUIHandlers, setMetricState, playAudioCallout, setVolume, setActiveVoicePack, invalidateDriveMap } from './execution_engine.js';
 
 // --- UI ELEMENTS ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -589,9 +589,11 @@ function setDriveView(mode) {
         toggleTextBtn.classList.remove('active');
         driveTextUI.classList.add('hidden');
         driveMapUI.classList.remove('hidden');
-        // Reparent map to drive map ui
-        driveMapUI.appendChild(document.querySelector('.map-container'));
-        setTimeout(() => map.invalidateSize(), 50);
+        // Force drive map to calculate correct size
+        setTimeout(() => {
+            // Signal execution engine to invalidate its map
+            invalidateDriveMap();
+        }, 50);
     } else {
         toggleTextBtn.classList.add('active');
         toggleMapBtn.classList.remove('active');
@@ -708,11 +710,6 @@ stopDriveBtn.addEventListener('click', () => {
 
     driveScreen.classList.remove('active');
     setupFlow.classList.add('active');
-    
-    // Reparent map back to setup screen in the correct DOM order
-    const setupScreen = document.getElementById('setup-screen-content');
-    const bottomSheet = document.getElementById('setup-bottom-sheet');
-    setupScreen.insertBefore(document.querySelector('.map-container'), bottomSheet);
     
     setTimeout(() => {
         map.invalidateSize();
