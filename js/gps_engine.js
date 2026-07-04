@@ -1,28 +1,26 @@
 // gps_engine.js
 
-// Simple 2D Kinematic Kalman Filter for GPS
+// 2D Kinematic Kalman Filter for GPS (Cartesian space)
 class GPSKalmanFilter {
     constructor() {
         this.initialized = false;
         this.lastTime = 0;
+        this.originLat = 0;
+        this.originLon = 0;
+        this.cosLat = 1;
         
-        // State: [lat, lon, v_lat, v_lon]
-        // Velocity in degrees per second (very small numbers)
+        // State: [x, y, vx, vy] in METERS and M/S
         this.state = [0, 0, 0, 0];
         
-        // Covariance Matrix
         this.P = [
-            [1, 0, 0, 0],
-            [0, 1, 0, 0],
-            [0, 0, 1, 0],
-            [0, 0, 0, 1]
+            [10, 0, 0, 0],
+            [0, 10, 0, 0],
+            [0, 0, 10, 0],
+            [0, 0, 0, 10]
         ];
         
-        // Process Noise (how much we trust the model vs measurements)
-        this.Q = 0.001; 
-        
-        // Measurement Noise (based on GPS accuracy, but we will convert meters to degrees)
-        this.R = 1.0; 
+        // Process noise variance for acceleration (m/s^2)
+        this.varAccel = 2.0; 
     }
 
     reset() {
@@ -31,63 +29,96 @@ class GPSKalmanFilter {
 
     update(lat, lon, speed, heading, accuracy, timestamp) {
         if (!this.initialized) {
-            this.state = [lat, lon, 0, 0];
+            this.originLat = lat;
+            this.originLon = lon;
+            this.cosLat = Math.cos(lat * Math.PI / 180);
+            this.state = [0, 0, 0, 0];
             this.lastTime = timestamp;
             this.initialized = true;
             return { lat, lon };
         }
 
-        const dt = (timestamp - this.lastTime) / 1000.0; // seconds
-        if (dt <= 0) return { lat: this.state[0], lon: this.state[1] };
+        const dt = (timestamp - this.lastTime) / 1000.0;
+        if (dt <= 0) return this.getLatLng();
         this.lastTime = timestamp;
+
+        // Convert current GPS to local meters
+        const z_x = (lon - this.originLon) * 111320 * this.cosLat;
+        const z_y = (lat - this.originLat) * 111320;
+
+        // Process Noise Matrix Q (discrete white noise acceleration model)
+        const dt2 = dt * dt;
+        const dt3 = dt2 * dt;
+        const dt4 = dt3 * dt;
+        const varA = this.varAccel;
+        
+        const q11 = 0.25 * dt4 * varA;
+        const q13 = 0.5 * dt3 * varA;
+        const q33 = dt2 * varA;
 
         // Predict Step
         this.state[0] += this.state[2] * dt;
         this.state[1] += this.state[3] * dt;
-
-        this.P[0][0] += dt * dt * this.P[2][2] + this.Q;
-        this.P[1][1] += dt * dt * this.P[3][3] + this.Q;
-        this.P[2][2] += this.Q;
-        this.P[3][3] += this.Q;
-
-        // Measurement Step
-        // Fallback: If device reports 0 speed, calculate it from raw coords to prevent the Kalman filter from stopping
-        let effSpeed = speed;
-        let effHeading = heading;
         
-        if (effSpeed === 0 || effSpeed === null || isNaN(effSpeed)) {
-             const distRaw = distanceMeters(this.state[0], this.state[1], lat, lon);
-             effSpeed = distRaw / dt;
-             effHeading = calculateBearing(this.state[0], this.state[1], lat, lon);
-        }
+        this.P[0][0] += dt2 * this.P[2][2] + 2 * dt * this.P[0][2] + q11;
+        this.P[1][1] += dt2 * this.P[3][3] + 2 * dt * this.P[1][3] + q11;
+        
+        this.P[0][2] += dt * this.P[2][2] + q13;
+        this.P[2][0] = this.P[0][2];
+        this.P[1][3] += dt * this.P[3][3] + q13;
+        this.P[3][1] = this.P[1][3];
 
-        const headingRad = effHeading * Math.PI / 180;
-        const vLat = (effSpeed * Math.cos(headingRad)) / 111320;
-        const vLon = (effSpeed * Math.sin(headingRad)) / (111320 * Math.cos(lat * Math.PI / 180));
+        this.P[2][2] += q33;
+        this.P[3][3] += q33;
 
-        // Adapt R based on GPS reported accuracy (convert meters to degrees)
-        // A 10m accuracy is roughly 0.00009 degrees
-        const accuracyDegrees = (accuracy || 10) / 111320;
-        const dynamicR = accuracyDegrees * accuracyDegrees; // variance
+        // Measurement Noise R
+        const R_pos = Math.max((accuracy || 10), 2.0);
+        const r_var = R_pos * R_pos;
 
-        const K_pos = this.P[0][0] / (this.P[0][0] + dynamicR);
-        const K_vel = this.P[2][2] / (this.P[2][2] + (dynamicR * 2));
+        // Kalman Gain
+        const S_x = this.P[0][0] + r_var;
+        const S_y = this.P[1][1] + r_var;
 
-        // Update State
-        this.state[0] = this.state[0] + K_pos * (lat - this.state[0]);
-        this.state[1] = this.state[1] + K_pos * (lon - this.state[1]);
-        this.state[2] = this.state[2] + K_vel * (vLat - this.state[2]);
-        this.state[3] = this.state[3] + K_vel * (vLon - this.state[3]);
+        const K_x0 = this.P[0][0] / S_x;
+        const K_x2 = this.P[2][0] / S_x;
+        
+        const K_y1 = this.P[1][1] / S_y;
+        const K_y3 = this.P[3][1] / S_y;
 
-        // Update Covariance
-        this.P[0][0] = (1 - K_pos) * this.P[0][0];
-        this.P[1][1] = (1 - K_pos) * this.P[1][1];
-        this.P[2][2] = (1 - K_vel) * this.P[2][2];
-        this.P[3][3] = (1 - K_vel) * this.P[3][3];
+        // Measurement Update
+        const y_x = z_x - this.state[0];
+        const y_y = z_y - this.state[1];
 
+        this.state[0] += K_x0 * y_x;
+        this.state[2] += K_x2 * y_x;
+        
+        this.state[1] += K_y1 * y_y;
+        this.state[3] += K_y3 * y_y;
+
+        // Covariance Update
+        const P00 = this.P[0][0];
+        const P02 = this.P[0][2];
+        this.P[0][0] -= K_x0 * P00;
+        this.P[0][2] -= K_x0 * P02;
+        this.P[2][0] = this.P[0][2];
+        this.P[2][2] -= K_x2 * P02;
+
+        const P11 = this.P[1][1];
+        const P13 = this.P[1][3];
+        this.P[1][1] -= K_y1 * P11;
+        this.P[1][3] -= K_y1 * P13;
+        this.P[3][1] = this.P[1][3];
+        this.P[3][3] -= K_y3 * P13;
+        
+        return this.getLatLng();
+    }
+
+    getLatLng() {
         return {
-            lat: this.state[0],
-            lon: this.state[1]
+            lat: this.originLat + (this.state[1] / 111320),
+            lon: this.originLon + (this.state[0] / (111320 * this.cosLat)),
+            vx: this.state[2],
+            vy: this.state[3]
         };
     }
 }
@@ -127,13 +158,16 @@ function calculateBearing(lat1, lon1, lat2, lon2) {
 // Soft Snapping Algorithm
 // -----------------------------------------------------------------
 function getClosestPointOnSegment(pLat, pLon, aLat, aLon, bLat, bLon) {
-    const x0 = pLon * Math.cos(pLat * Math.PI / 180);
+    // Project all points using the same reference latitude to avoid skew
+    const cosLat = Math.cos(pLat * Math.PI / 180);
+    
+    const x0 = pLon * cosLat;
     const y0 = pLat;
     
-    const x1 = aLon * Math.cos(aLat * Math.PI / 180);
+    const x1 = aLon * cosLat;
     const y1 = aLat;
     
-    const x2 = bLon * Math.cos(bLat * Math.PI / 180);
+    const x2 = bLon * cosLat;
     const y2 = bLat;
 
     const dx = x2 - x1;
@@ -213,6 +247,9 @@ export function processGPSUpdate(position, routeData) {
 
     // 1. Kalman Filter
     const filtered = kf.update(rawLat, rawLon, rawSpeed, rawHeading, accuracy, timestamp);
+    
+    // Calculate robust filtered speed in m/s
+    const filteredSpeed = Math.sqrt(filtered.vx * filtered.vx + filtered.vy * filtered.vy);
 
     // 2. Soft Snap to Route
     const snapResult = snapToRoute(filtered.lat, filtered.lon, routeData);
@@ -220,7 +257,7 @@ export function processGPSUpdate(position, routeData) {
     return {
         lat: snapResult.lat,
         lon: snapResult.lon,
-        speed: rawSpeed, 
+        speed: filteredSpeed, // Replace raw OS speed with derived physics speed!
         heading: snapResult.status === 'SNAPPED' ? snapResult.heading : rawHeading,
         status: snapResult.status,
         rawLat: rawLat,
