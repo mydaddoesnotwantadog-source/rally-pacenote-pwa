@@ -58,7 +58,7 @@
                 <div id="setup-screen-content" class="pager-screen">
                     <div class="swipe-hint swipe-down">// SWIPE DOWN FOR AUDIO STORE</div>
             <header class="rigid-header">
-                <div class="version-tag">v1.0.38</div>
+                <div class="version-tag">v1.0.39</div>
                 <div class="brand">
                     <h1>RALLY<span class="accent">//</span>NODE</h1>
                     <div class="system-status">
@@ -90,7 +90,12 @@
                     <div class="drag-handle"></div>
                 </div>
                 
-                <button id="start-drive-btn" class="primary-btn" disabled>INITIATE DRIVE</button>
+                <button id="start-drive-btn" class="primary-btn hold-to-start" disabled>
+                    <svg class="perimeter-svg">
+                        <rect x="0" y="0" width="100%" height="100%" rx="3"></rect>
+                    </svg>
+                    <span class="btn-text">INITIATE DRIVE</span>
+                </button>
                 
                 <div class="stats-grid">
                     <div class="stat-box">
@@ -209,6 +214,10 @@
                 <div class="upcoming-notes">
                     <p>NXT <span class="accent">//</span> <span id="next-callout">---</span></p>
                 </div>
+            </div>
+
+            <div id="drive-map-ui" class="hidden">
+                <!-- Map container will be moved here by JS -->
             </div>
         </section>
 

@@ -529,22 +529,102 @@ clearRouteBtn.addEventListener('click', () => {
 });
 
 // --- DRIVE ENGINE ---
-startDriveBtn.addEventListener('click', async () => {
+let holdTimer = null;
+let holdActive = false;
+let driveViewMode = 'MAP'; // Default to map
+
+// View Toggle Handlers
+const toggleTextBtn = document.getElementById('toggle-text');
+const toggleMapBtn = document.getElementById('toggle-map');
+const driveTextUI = document.getElementById('drive-text-ui');
+const driveMapUI = document.getElementById('drive-map-ui');
+
+function setDriveView(mode) {
+    driveViewMode = mode;
+    if (mode === 'MAP') {
+        toggleMapBtn.classList.add('active');
+        toggleTextBtn.classList.remove('active');
+        driveTextUI.classList.add('hidden');
+        driveMapUI.classList.remove('hidden');
+        // Reparent map to drive map ui
+        driveMapUI.appendChild(document.querySelector('.map-container'));
+        setTimeout(() => map.invalidateSize(), 50);
+    } else {
+        toggleTextBtn.classList.add('active');
+        toggleMapBtn.classList.remove('active');
+        driveMapUI.classList.add('hidden');
+        driveTextUI.classList.remove('hidden');
+    }
+}
+
+toggleTextBtn.addEventListener('click', () => {
+    if (navigator.vibrate) navigator.vibrate(20);
+    setDriveView('TXT');
+});
+
+toggleMapBtn.addEventListener('click', () => {
+    if (navigator.vibrate) navigator.vibrate(20);
+    setDriveView('MAP');
+});
+
+function cancelHold() {
+    if (holdTimer) clearTimeout(holdTimer);
+    holdActive = false;
+    startDriveBtn.classList.remove('holding');
+}
+
+function startDriveHold() {
+    if (startDriveBtn.disabled) return;
+    if (holdActive) return;
+    
+    // Set up perimeter exact dimension for SVG stroke
+    const p = (startDriveBtn.offsetWidth + startDriveBtn.offsetHeight) * 2;
+    startDriveBtn.style.setProperty('--perimeter', p);
+    startDriveBtn.offsetHeight; // Force reflow
+    
+    holdActive = true;
+    startDriveBtn.classList.add('holding');
+    
+    if (navigator.vibrate) navigator.vibrate(50);
+
+    holdTimer = setTimeout(() => {
+        if (!holdActive) return;
+        executeDriveTransition();
+    }, 700);
+}
+
+startDriveBtn.addEventListener('mousedown', startDriveHold);
+startDriveBtn.addEventListener('touchstart', (e) => {
+    // Prevent default to avoid simulating mousedown
+    e.preventDefault();
+    startDriveHold();
+}, { passive: false });
+
+startDriveBtn.addEventListener('mouseup', cancelHold);
+startDriveBtn.addEventListener('mouseleave', cancelHold);
+startDriveBtn.addEventListener('touchend', cancelHold);
+startDriveBtn.addEventListener('touchcancel', cancelHold);
+
+async function executeDriveTransition() {
     if (!currentRouteData || !generatedNotes) return;
+    cancelHold(); // Reset button
+
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Haptic success
 
     if (wakeLock === null && 'wakeLock' in navigator) {
         navigator.wakeLock.request('screen').then(lock => { wakeLock = lock; }).catch(console.warn);
     }
 
+    // Default to MAP mode
+    setDriveView('MAP');
+
+    // Smooth CSS-only Transition
     setupFlow.classList.remove('active');
+    driveScreen.classList.add('active');
+    
     setTimeout(() => {
-        setupFlow.style.display = 'none';
-        driveScreen.style.display = 'flex';
-        setTimeout(() => {
-            driveScreen.classList.add('active');
-            window.dispatchEvent(new Event('resize')); // Fix for any canvas/maps
-        }, 50);
-    }, 400); // Increased to match CSS 0.4s animation time
+        window.dispatchEvent(new Event('resize')); // Fix for any canvas/maps
+    }, 500); // Wait for transition to complete
 
     setUIHandlers({
         onSpeedUpdate: (speed) => {
@@ -577,22 +657,23 @@ startDriveBtn.addEventListener('click', async () => {
     });
 
     startDrive(currentRouteData, generatedNotes);
-});
+}
 
 stopDriveBtn.addEventListener('click', () => {
     stopDrive();
     if (wakeLock !== null) wakeLock.release().then(() => { wakeLock = null; });
 
     driveScreen.classList.remove('active');
+    setupFlow.classList.add('active');
+    
+    // Reparent map back to setup screen in the correct DOM order
+    const setupScreen = document.getElementById('setup-screen-content');
+    const bottomSheet = document.getElementById('setup-bottom-sheet');
+    setupScreen.insertBefore(document.querySelector('.map-container'), bottomSheet);
+    
     setTimeout(() => {
-        driveScreen.style.display = 'none';
-        setupFlow.style.display = 'flex';
-        setTimeout(() => {
-            setupFlow.classList.add('active');
-            // FIX: Force Leaflet to recalculate map size now that container is visible again
-            map.invalidateSize();
-        }, 50);
-    }, 400); // Increased to match CSS 0.4s animation time
+        map.invalidateSize();
+    }, 500); // Wait for transition to complete
 });
 
 // Boot

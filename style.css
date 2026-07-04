@@ -36,6 +36,7 @@ body {
 }
 
 .app-container {
+    position: relative;
     width: 100%;
     height: 100vh;
     height: 100dvh;
@@ -80,18 +81,26 @@ body {
 
 /* Screens */
 .screen {
-    display: none;
-    flex-direction: column;
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
     height: 100%;
+    display: flex;
+    flex-direction: column;
     opacity: 0;
-    transform: scale(0.98) translateY(10px);
-    transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1), transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    visibility: hidden;
+    pointer-events: none;
+    transform: scale(0.95);
+    transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1), transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), visibility 0.5s;
+    z-index: 1;
 }
 
 .screen.active {
-    display: flex;
     opacity: 1;
-    transform: scale(1) translateY(0);
+    visibility: visible;
+    pointer-events: auto;
+    transform: scale(1);
+    z-index: 2;
 }
 
 /* Rigid Header */
@@ -565,6 +574,43 @@ h1 .accent {
     box-shadow: 0 2px 5px rgba(255, 42, 42, 0.4);
 }
 
+/* Hold to Start Button overrides */
+.hold-to-start {
+    position: relative;
+    overflow: hidden;
+    /* Remove padding scaling on click to ensure smooth perimeter drawing */
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.hold-to-start .btn-text {
+    position: relative;
+    z-index: 2;
+}
+
+.hold-to-start .perimeter-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.hold-to-start .perimeter-svg rect {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 6;
+    stroke-dasharray: var(--perimeter, 1000);
+    stroke-dashoffset: var(--perimeter, 1000);
+    transition: stroke-dashoffset 0s;
+}
+
+.hold-to-start.holding .perimeter-svg rect {
+    stroke-dashoffset: 0;
+    /* A fast, serious feeling transition */
+    transition: stroke-dashoffset 700ms linear;
+}
+
 .danger-btn {
     background: transparent;
     color: var(--accent-red);
@@ -810,6 +856,73 @@ h1 .accent {
 /* Ensure Leaflet controls don't show up on drive map */
 #drive-map .leaflet-control-container {
     display: none;
+}
+
+/* Drive Screen Layout */
+#drive-flow {
+    background: #000;
+}
+
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: var(--surface);
+    border-bottom: 2px solid var(--surface-border);
+    position: relative;
+    z-index: 10;
+}
+
+.speed-box {
+    display: flex;
+    flex-direction: column;
+}
+
+.speed-value {
+    font-family: var(--font-heading);
+    font-size: 3rem;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--text-primary);
+}
+
+.speed-unit {
+    font-size: 0.8rem;
+    color: var(--accent-red);
+    font-weight: 900;
+}
+
+#drive-text-ui {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+}
+
+#drive-map-ui {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 5;
+}
+
+#drive-map-ui .map-container {
+    height: 100%;
+    width: 100%;
+    position: absolute; /* Take over the container */
+    top: 0; left: 0;
+    border-bottom: none;
+}
+
+.pacenote-display {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
 }
 
 #car-marker {
