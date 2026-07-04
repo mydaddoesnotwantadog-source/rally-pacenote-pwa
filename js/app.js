@@ -329,48 +329,85 @@ function initMap() {
         }
     });
 
-    routingControl.on('waypointschanged', function(e) {
-        const waypoints = e.waypoints.filter(w => w.latLng !== null);
+    let isUserExitedFullscreen = false;
+
+    function enterFullscreenMap() {
         const mapContainer = document.querySelector('.map-container');
         const bottomSheet = document.getElementById('setup-bottom-sheet');
         const verticalPager = document.getElementById('vertical-pager');
+        const setupScreen = document.getElementById('setup-screen-content');
+
+        if (mapContainer.classList.contains('map-fullscreen')) return;
+
+        mapContainer.classList.add('map-fullscreen');
+        bottomSheet.classList.add('fullscreen-mode');
+        verticalPager.classList.add('no-scroll');
+        setupScreen.classList.add('fullscreen-active');
+        
+        document.querySelector('.system-status').style.opacity = '0';
+        document.getElementById('unit-toggle').style.opacity = '0';
+        document.querySelector('.map-overlay').style.opacity = '0';
+        
+        setTimeout(() => {
+            document.querySelector('.system-status').style.display = 'none';
+            document.getElementById('unit-toggle').style.display = 'none';
+            document.querySelector('.map-overlay').style.display = 'none';
+        }, 400);
+
+        // Continuously invalidate size during CSS transition for smooth animation
+        let startTime = Date.now();
+        function animateMap() {
+            map.invalidateSize();
+            if (Date.now() - startTime < 450) {
+                requestAnimationFrame(animateMap);
+            }
+        }
+        animateMap();
+    }
+
+    function exitFullscreenMap() {
+        const mapContainer = document.querySelector('.map-container');
+        const bottomSheet = document.getElementById('setup-bottom-sheet');
+        const verticalPager = document.getElementById('vertical-pager');
+        const setupScreen = document.getElementById('setup-screen-content');
+
+        mapContainer.classList.remove('map-fullscreen');
+        bottomSheet.classList.remove('fullscreen-mode');
+        bottomSheet.classList.remove('expanded');
+        verticalPager.classList.remove('no-scroll');
+        setupScreen.classList.remove('fullscreen-active');
+        
+        document.querySelector('.system-status').style.display = '';
+        document.getElementById('unit-toggle').style.display = '';
+        document.querySelector('.map-overlay').style.display = '';
+        
+        setTimeout(() => {
+            document.querySelector('.system-status').style.opacity = '1';
+            document.getElementById('unit-toggle').style.opacity = '1';
+            document.querySelector('.map-overlay').style.opacity = '1';
+        }, 10);
+
+        // Continuously invalidate size during CSS transition for smooth animation
+        let startTime = Date.now();
+        function animateMap() {
+            map.invalidateSize();
+            if (Date.now() - startTime < 450) {
+                requestAnimationFrame(animateMap);
+            }
+        }
+        animateMap();
+    }
+
+    routingControl.on('waypointschanged', function(e) {
+        const waypoints = e.waypoints.filter(w => w.latLng !== null);
         
         if (waypoints.length >= 1) {
-            if (!mapContainer.classList.contains('map-fullscreen')) {
-                mapContainer.classList.add('map-fullscreen');
-                bottomSheet.classList.add('fullscreen-mode');
-                verticalPager.classList.add('no-scroll');
-                
-                document.querySelector('.system-status').style.opacity = '0';
-                document.getElementById('unit-toggle').style.opacity = '0';
-                document.querySelector('.map-overlay').style.opacity = '0';
-                
-                setTimeout(() => {
-                    document.querySelector('.system-status').style.display = 'none';
-                    document.getElementById('unit-toggle').style.display = 'none';
-                    document.querySelector('.map-overlay').style.display = 'none';
-                }, 400);
-
-                // Give CSS time to apply absolute position, then invalidate size to fix tiles
-                setTimeout(() => map.invalidateSize(), 400);
+            if (!isUserExitedFullscreen) {
+                enterFullscreenMap();
             }
         } else {
-            mapContainer.classList.remove('map-fullscreen');
-            bottomSheet.classList.remove('fullscreen-mode');
-            bottomSheet.classList.remove('expanded');
-            verticalPager.classList.remove('no-scroll');
-            
-            document.querySelector('.system-status').style.display = '';
-            document.getElementById('unit-toggle').style.display = '';
-            document.querySelector('.map-overlay').style.display = '';
-            
-            setTimeout(() => {
-                document.querySelector('.system-status').style.opacity = '1';
-                document.getElementById('unit-toggle').style.opacity = '1';
-                document.querySelector('.map-overlay').style.opacity = '1';
-            }, 10);
-
-            setTimeout(() => map.invalidateSize(), 400);
+            isUserExitedFullscreen = false; // Reset if all waypoints cleared
+            exitFullscreenMap();
         }
     });
 
@@ -409,10 +446,12 @@ function setupBottomSheetLogic() {
         currentY = e.touches[0].clientY;
         let delta = currentY - startY;
         
+        // Only allow swiping UP (negative delta) to exit fullscreen
+        if (delta > 0) delta = 0; 
+        
         let newTransform = startTransform + delta;
-        // Clamp between 0 (fully expanded) and bottomSheet.offsetHeight - 122 (collapsed)
+        // Clamp so it doesn't go below the starting point
         const maxTransform = bottomSheet.offsetHeight - 122;
-        if (newTransform < 0) newTransform = 0;
         if (newTransform > maxTransform) newTransform = maxTransform;
 
         bottomSheet.style.transform = `translateY(${newTransform}px)`;
@@ -428,16 +467,10 @@ function setupBottomSheetLogic() {
 
         let delta = currentY - startY;
         
-        if (bottomSheet.classList.contains('expanded')) {
-            // If dragging down from expanded state
-            if (delta > 50) {
-                bottomSheet.classList.remove('expanded');
-            }
-        } else {
-            // If dragging up from collapsed state
-            if (delta < -50) {
-                bottomSheet.classList.add('expanded');
-            }
+        // If dragging up sufficiently, exit fullscreen
+        if (delta < -50) {
+            isUserExitedFullscreen = true;
+            exitFullscreenMap();
         }
     });
 }

@@ -171,7 +171,17 @@ body {
     padding: 16px 0;
     opacity: 0.6;
     animation: bounce-y 2s infinite;
+    transition: opacity 0.4s ease, height 0.4s ease, padding 0.4s ease, margin 0.4s ease;
 }
+
+.fullscreen-active .swipe-hint {
+    opacity: 0;
+    height: 0;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+
 @keyframes bounce-y {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(5px); }
