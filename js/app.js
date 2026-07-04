@@ -235,20 +235,20 @@ function initMap() {
     }).addTo(map);
 
     let userMarker = null;
-    let locationDetected = false;
+    
+    // Auto-detect USA to default to Imperial
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+    if (tz.startsWith('America/') && !tz.includes('Argentina') && !tz.includes('Santiago') && !tz.includes('Sao_Paulo') && !tz.includes('Bogota') && !tz.includes('Lima')) {
+        // Technically Canada is metric, but for simplicity we'll check if they are en-US language too
+        if (navigator.language === 'en-US') {
+            setUnits(false); // MI
+        }
+    }
 
     if (navigator.geolocation) {
         navigator.geolocation.watchPosition((pos) => {
             const latlng = [pos.coords.latitude, pos.coords.longitude];
             const heading = pos.coords.heading || 0;
-            
-            if (!locationDetected) {
-                locationDetected = true;
-                // Rough bounding box for contiguous USA
-                if (latlng[0] > 24.39 && latlng[0] < 49.38 && latlng[1] > -125.0 && latlng[1] < -66.93) {
-                    setUnits(false); // Set to Imperial (MI)
-                }
-            }
             
             if (!userMarker) {
                 map.setView(latlng, 13);
@@ -278,8 +278,7 @@ function initMap() {
         show: false,
         addWaypoints: true,
         lineOptions: {
-            styles: [{ color: 'var(--accent-red)', opacity: 0.9, weight: 6 }],
-            renderer: L.canvas()
+            styles: [{ color: 'var(--accent-red)', opacity: 0.9, weight: 6 }]
         },
         createMarker: function(i, wp, nWps) {
             // Create draggable markers with custom automotive minimalist numbered pins
@@ -362,9 +361,9 @@ function initMap() {
         document.querySelector('.map-overlay').style.opacity = '0';
         
         setTimeout(() => {
-            document.querySelector('.system-status').style.display = 'none';
-            document.getElementById('unit-toggle').style.display = 'none';
-            document.querySelector('.map-overlay').style.display = 'none';
+            document.querySelector('.system-status').style.visibility = 'hidden';
+            document.getElementById('unit-toggle').style.visibility = 'hidden';
+            document.querySelector('.map-overlay').style.visibility = 'hidden';
         }, 400);
 
         // Continuously invalidate size during CSS transition for smooth animation
@@ -390,9 +389,9 @@ function initMap() {
         verticalPager.classList.remove('no-scroll');
         setupScreen.classList.remove('fullscreen-active');
         
-        document.querySelector('.system-status').style.display = '';
-        document.getElementById('unit-toggle').style.display = '';
-        document.querySelector('.map-overlay').style.display = '';
+        document.querySelector('.system-status').style.visibility = 'visible';
+        document.getElementById('unit-toggle').style.visibility = 'visible';
+        document.querySelector('.map-overlay').style.visibility = 'visible';
         
         setTimeout(() => {
             document.querySelector('.system-status').style.opacity = '1';
