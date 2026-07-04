@@ -442,23 +442,23 @@ function setupBottomSheetLogic(onExitFullscreen, onEnterFullscreen) {
     const bottomSheet = document.getElementById('setup-bottom-sheet');
     const dragHandle = document.querySelector('.drag-handle-container');
     const expandHandle = document.getElementById('map-expand-handle');
+    const mapContainer = document.querySelector('.map-container');
     
     if (!bottomSheet || !dragHandle) return;
 
     let startY = 0;
     let currentY = 0;
     let isDragging = false;
-    let startTransform = 0; // 0 is expanded, positive is collapsed
+    let startMapHeight = 0;
 
     // BOTTOM SHEET SWIPE UP TO EXIT
     dragHandle.addEventListener('touchstart', (e) => {
-        if (!bottomSheet.classList.contains('fullscreen-mode')) return;
+        if (!mapContainer.classList.contains('map-fullscreen')) return;
         isDragging = true;
         startY = e.touches[0].clientY;
         
-        // Remove transition during drag for 1:1 movement
-        bottomSheet.style.transition = 'none';
-        startTransform = bottomSheet.classList.contains('expanded') ? 0 : bottomSheet.offsetHeight - 122;
+        startMapHeight = mapContainer.offsetHeight;
+        mapContainer.style.transition = 'none';
     });
 
     dragHandle.addEventListener('touchmove', (e) => {
@@ -469,27 +469,23 @@ function setupBottomSheetLogic(onExitFullscreen, onEnterFullscreen) {
         // Only allow swiping UP (negative delta) to exit fullscreen
         if (delta > 0) delta = 0; 
         
-        let newTransform = startTransform + delta;
-        // Clamp so it doesn't go below the starting point
-        const maxTransform = bottomSheet.offsetHeight - 122;
-        if (newTransform > maxTransform) newTransform = maxTransform;
-
-        bottomSheet.style.transform = `translateY(${newTransform}px)`;
+        mapContainer.style.height = (startMapHeight + delta) + 'px';
+        if (typeof map !== 'undefined') map.invalidateSize();
     });
 
     dragHandle.addEventListener('touchend', (e) => {
         if (!isDragging) return;
         isDragging = false;
         
-        // Restore transition
-        bottomSheet.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
-        bottomSheet.style.transform = ''; // Clear inline style to let CSS take over
+        mapContainer.style.transition = 'all 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
 
         let delta = currentY - startY;
         
-        // If dragging up sufficiently, exit fullscreen
         if (delta < -50 && onExitFullscreen) {
+            mapContainer.style.height = '';
             onExitFullscreen();
+        } else {
+            mapContainer.style.height = ''; // Reverts to CSS map-fullscreen class height
         }
     });
 
@@ -498,17 +494,14 @@ function setupBottomSheetLogic(onExitFullscreen, onEnterFullscreen) {
         let expandStartY = 0;
         let expandCurrentY = 0;
         let isExpandDragging = false;
-        let startMapHeight = 0;
-        const mapContainer = document.querySelector('.map-container');
-        const bottomSheet = document.getElementById('setup-bottom-sheet');
+        let startMapHeightExpand = 0;
 
         expandHandle.addEventListener('touchstart', (e) => {
             isExpandDragging = true;
             expandStartY = e.touches[0].clientY;
-            startMapHeight = mapContainer.offsetHeight;
+            startMapHeightExpand = mapContainer.offsetHeight;
             
             mapContainer.style.transition = 'none';
-            bottomSheet.style.transition = 'none';
         });
 
         expandHandle.addEventListener('touchmove', (e) => {
@@ -520,9 +513,9 @@ function setupBottomSheetLogic(onExitFullscreen, onEnterFullscreen) {
             let delta = expandCurrentY - expandStartY;
             if (delta < 0) delta = 0; // only drag down
             
-            mapContainer.style.height = (startMapHeight + delta) + 'px';
+            mapContainer.style.height = (startMapHeightExpand + delta) + 'px';
             mapContainer.style.flex = 'none';
-            map.invalidateSize(); // Prevent rendering jitter during drag
+            if (typeof map !== 'undefined') map.invalidateSize();
         }, { passive: false });
 
         expandHandle.addEventListener('touchend', (e) => {
@@ -532,14 +525,13 @@ function setupBottomSheetLogic(onExitFullscreen, onEnterFullscreen) {
             let delta = expandCurrentY - expandStartY;
             
             mapContainer.style.transition = 'all 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
-            bottomSheet.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
             
             if ((delta > 20 || delta === 0) && onEnterFullscreen) {
                 mapContainer.style.height = '';
                 mapContainer.style.flex = '';
                 onEnterFullscreen();
             } else {
-                mapContainer.style.height = startMapHeight + 'px';
+                mapContainer.style.height = startMapHeightExpand + 'px';
                 setTimeout(() => {
                     mapContainer.style.height = '';
                     mapContainer.style.flex = '';
