@@ -498,10 +498,17 @@ function setupBottomSheetLogic(onExitFullscreen, onEnterFullscreen) {
         let expandStartY = 0;
         let expandCurrentY = 0;
         let isExpandDragging = false;
+        let startMapHeight = 0;
+        const mapContainer = document.querySelector('.map-container');
+        const bottomSheet = document.getElementById('setup-bottom-sheet');
 
         expandHandle.addEventListener('touchstart', (e) => {
             isExpandDragging = true;
             expandStartY = e.touches[0].clientY;
+            startMapHeight = mapContainer.offsetHeight;
+            
+            mapContainer.style.transition = 'none';
+            bottomSheet.style.transition = 'none';
         });
 
         expandHandle.addEventListener('touchmove', (e) => {
@@ -509,6 +516,12 @@ function setupBottomSheetLogic(onExitFullscreen, onEnterFullscreen) {
             // Prevent pull-to-refresh or scrolling
             e.preventDefault();
             expandCurrentY = e.touches[0].clientY;
+            
+            let delta = expandCurrentY - expandStartY;
+            if (delta < 0) delta = 0; // only drag down
+            
+            mapContainer.style.height = (startMapHeight + delta) + 'px';
+            mapContainer.style.flex = 'none';
         }, { passive: false });
 
         expandHandle.addEventListener('touchend', (e) => {
@@ -517,10 +530,19 @@ function setupBottomSheetLogic(onExitFullscreen, onEnterFullscreen) {
             
             let delta = expandCurrentY - expandStartY;
             
-            // If dragging down sufficiently, enter fullscreen
-            // Fallback: If they just tapped it (delta == 0), also expand!
+            mapContainer.style.transition = 'all 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
+            bottomSheet.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
+            
             if ((delta > 20 || delta === 0) && onEnterFullscreen) {
+                mapContainer.style.height = '';
+                mapContainer.style.flex = '';
                 onEnterFullscreen();
+            } else {
+                mapContainer.style.height = startMapHeight + 'px';
+                setTimeout(() => {
+                    mapContainer.style.height = '';
+                    mapContainer.style.flex = '';
+                }, 400);
             }
         });
     }
