@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -7,28 +8,31 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>RALLY//NODE</title>
-    
+
     <!-- Premium Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Inter:wght@400;600;800&display=swap"
+        rel="stylesheet">
+
     <!-- Leaflet & Routing Machine CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script src="https://unpkg.com/leaflet-rotate@0.2.8/dist/leaflet-rotate-src.js"></script>
-    
+
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <main class="app-container">
-        
+
         <!-- SETUP & SHOP FLOW -->
         <section id="setup-flow" class="screen active">
             <div id="vertical-pager" class="vertical-pager">
-                
+
                 <!-- SHOP SCREEN (Top) -->
                 <div id="shop-screen" class="pager-screen">
                     <header class="rigid-header shop-header">
@@ -57,72 +61,72 @@
                 <!-- SETUP SCREEN (Bottom) -->
                 <div id="setup-screen-content" class="pager-screen">
                     <div class="swipe-hint swipe-down">// SWIPE DOWN FOR AUDIO STORE</div>
-            <header class="rigid-header">
-                <div class="version-tag">v1.0.45</div>
-                <div class="brand">
-                    <h1>RALLY<span class="accent">//</span>NODE</h1>
-                    <div class="system-status">
-                        <div class="dot online" id="network-dot"></div>
-                        <span id="network-text">SYS.ONLINE</span>
-                    </div>
-                </div>
-                <div class="unit-toggle" id="unit-toggle">
-                    <div class="toggle-option active" id="unit-km">KM</div>
-                    <div class="toggle-divider accent">//</div>
-                    <div class="toggle-option" id="unit-mi">MI</div>
-                </div>
-            </header>
+                    <header class="rigid-header">
+                        <div class="version-tag">v1.0.45</div>
+                        <div class="brand">
+                            <h1>RALLY<span class="accent">//</span>NODE</h1>
+                            <div class="system-status">
+                                <div class="dot online" id="network-dot"></div>
+                                <span id="network-text">SYS.ONLINE</span>
+                            </div>
+                        </div>
+                        <div class="unit-toggle" id="unit-toggle">
+                            <div class="toggle-option active" id="unit-km">KM</div>
+                            <div class="toggle-divider accent">//</div>
+                            <div class="toggle-option" id="unit-mi">MI</div>
+                        </div>
+                    </header>
 
-            <div class="map-container">
-                <div id="map"></div>
-                <div class="map-overlay">
-                    <div class="map-drag-handle" id="map-expand-handle">
-                        <div class="drag-handle"></div>
+                    <div class="map-container">
+                        <div id="map"></div>
+                        <div class="map-overlay">
+                            <div class="map-drag-handle" id="map-expand-handle">
+                                <div class="drag-handle"></div>
+                            </div>
+                            <div class="overlay-buttons">
+                                <button id="sensor-auth-btn" class="minimal-btn">SNSR</button>
+                                <button id="clear-route-btn" class="minimal-btn">CLR</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="overlay-buttons">
-                        <button id="sensor-auth-btn" class="minimal-btn">SNSR</button>
-                        <button id="clear-route-btn" class="minimal-btn">CLR</button>
-                    </div>
-                </div>
-            </div>
 
-            <!-- BOTTOM SHEET (STATS & INITIATE) -->
-            <div id="setup-bottom-sheet" class="bottom-sheet">
-                <div class="drag-handle-container">
-                    <div class="drag-handle"></div>
-                </div>
-                
-                <button id="start-drive-btn" class="primary-btn hold-to-start" disabled>
-                    <svg class="perimeter-svg">
-                        <rect x="0" y="0" width="100%" height="100%" rx="3"></rect>
-                    </svg>
-                    <span class="btn-text">INITIATE DRIVE</span>
-                </button>
-                
-                <div class="stats-grid">
-                    <div class="stat-box">
-                        <span class="stat-label">DIST</span>
-                        <span class="stat-value" id="stat-dist">--</span>
-                        <span class="stat-unit distance-unit">KM</span>
+                    <!-- BOTTOM SHEET (STATS & INITIATE) -->
+                    <div id="setup-bottom-sheet" class="bottom-sheet">
+                        <div class="drag-handle-container">
+                            <div class="drag-handle"></div>
+                        </div>
+
+                        <button id="start-drive-btn" class="primary-btn hold-to-start" disabled>
+                            <svg class="perimeter-svg">
+                                <rect x="0" y="0" width="100%" height="100%" rx="3"></rect>
+                            </svg>
+                            <span class="btn-text">INITIATE DRIVE</span>
+                        </button>
+
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <span class="stat-label">DIST</span>
+                                <span class="stat-value" id="stat-dist">--</span>
+                                <span class="stat-unit distance-unit">KM</span>
+                            </div>
+                            <div class="stat-box">
+                                <span class="stat-label">TURNS</span>
+                                <span class="stat-value" id="stat-turns">--</span>
+                                <span class="stat-unit">TOTAL</span>
+                            </div>
+                            <div class="stat-box">
+                                <span class="stat-label">AVG.T</span>
+                                <span class="stat-value" id="stat-avg">--</span>
+                                <span class="stat-unit">NOTE</span>
+                            </div>
+                            <div class="stat-box accent-box">
+                                <span class="stat-label">HAIRPIN</span>
+                                <span class="stat-value" id="stat-hairpins">0</span>
+                                <span class="stat-unit">WRN</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="stat-box">
-                        <span class="stat-label">TURNS</span>
-                        <span class="stat-value" id="stat-turns">--</span>
-                        <span class="stat-unit">TOTAL</span>
-                    </div>
-                    <div class="stat-box">
-                        <span class="stat-label">AVG.T</span>
-                        <span class="stat-value" id="stat-avg">--</span>
-                        <span class="stat-unit">NOTE</span>
-                    </div>
-                    <div class="stat-box accent-box">
-                        <span class="stat-label">HAIRPIN</span>
-                        <span class="stat-value" id="stat-hairpins">0</span>
-                        <span class="stat-unit">WRN</span>
-                    </div>
-                </div>
-            </div>
-                    
+
                     <div style="flex-grow: 1;"></div>
                     <div class="swipe-hint swipe-up">SWIPE UP FOR AUDIO PREVIEW //</div>
                 </div> <!-- End setup-screen-content -->
@@ -136,13 +140,14 @@
                     </header>
                     <div class="shop-content preview-content">
                         <div class="swipe-hint swipe-down" style="padding-top:0;">// SWIPE DOWN TO RETURN</div>
-                        
+
                         <div class="volume-control">
                             <span class="vol-label">VOL</span>
-                            <input type="range" id="master-volume" min="0.1" max="5.0" step="0.1" value="1.0" class="brutal-slider">
+                            <input type="range" id="master-volume" min="0.1" max="5.0" step="0.1" value="1.0"
+                                class="brutal-slider">
                             <span class="vol-value" id="vol-display">1.0x</span>
                         </div>
-                        
+
                         <div class="preview-dashboard">
                             <!-- Left Column -->
                             <div class="preview-col">
@@ -155,10 +160,10 @@
                                 <button class="preview-btn" data-callout="Left Square">SQ.L</button>
                                 <button class="preview-btn" data-callout="Left Hairpin">HP.L</button>
                             </div>
-                            
+
                             <!-- Divider -->
                             <div class="preview-divider"></div>
-                            
+
                             <!-- Right Column -->
                             <div class="preview-col">
                                 <button class="preview-btn" data-callout="Right 6">R6</button>
@@ -181,12 +186,12 @@
 
         <!-- DRIVE SCREEN -->
         <section id="drive-screen" class="screen">
-            
+
             <div id="drive-map-wrapper" class="hidden">
                 <div id="drive-map"></div>
                 <div id="car-marker">
                     <svg viewBox="0 0 24 24" width="48" height="48">
-                        <path d="M12 2L2 22l10-4 10 4L12 2z" fill="#ff2a2a" stroke="#0a0a0a" stroke-width="2"/>
+                        <path d="M12 2L2 22l10-4 10 4L12 2z" fill="#ff2a2a" stroke="#0a0a0a" stroke-width="2" />
                     </svg>
                 </div>
             </div>
@@ -195,9 +200,11 @@
                 <div class="speed-box">
                     <span class="speed-value" id="current-speed">0</span>
                     <span class="speed-unit">MPH</span>
-                    <div id="gps-status-indicator" style="font-size: 0.6rem; font-weight: 800; margin-top: 4px; color: var(--accent-red); letter-spacing: 1px;">GPS: RAW</div>
+                    <div id="gps-status-indicator"
+                        style="font-size: 0.6rem; font-weight: 800; margin-top: 4px; color: var(--accent-red); letter-spacing: 1px;">
+                        GPS: RAW</div>
                 </div>
-                
+
                 <div class="view-toggle">
                     <button id="toggle-text" class="toggle-btn active">TXT</button>
                     <button id="toggle-map" class="toggle-btn">MAP</button>
@@ -224,7 +231,7 @@
                 </div>
                 <div id="car-marker">
                     <svg viewBox="0 0 24 24" width="32" height="32" fill="var(--accent-red)">
-                        <path d="M12 2L2 22l10-4 10 4z"/>
+                        <path d="M12 2L2 22l10-4 10 4z" />
                     </svg>
                 </div>
             </div>
@@ -236,4 +243,5 @@
     <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
     <script type="module" src="js/app.js"></script>
 </body>
+
 </html>

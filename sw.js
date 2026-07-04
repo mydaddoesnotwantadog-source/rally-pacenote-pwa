@@ -14,7 +14,7 @@ self.addEventListener('install', (event) => {
     self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME)
-        .then((cache) => cache.addAll(APP_SHELL))
+            .then((cache) => cache.addAll(APP_SHELL))
     );
 });
 
@@ -31,28 +31,28 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
-    
+
     // Bypass SW for map tiles
     if (url.hostname.includes('tile.openstreetmap.org') || url.hostname.includes('cartocdn.com')) {
-        return; 
+        return;
     }
 
     event.respondWith(
         caches.match(event.request)
-        .then((response) => {
-            if (response) return response;
-            return fetch(event.request).then((networkResponse) => {
-                // Dynamically cache audio files as they are loaded
-                if (url.pathname.includes('/audio/')) {
-                    const responseClone = networkResponse.clone();
-                    caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(event.request, responseClone);
-                    });
-                }
-                return networkResponse;
-            }).catch(() => {
-                // Return offline fallback if needed
-            });
-        })
+            .then((response) => {
+                if (response) return response;
+                return fetch(event.request).then((networkResponse) => {
+                    // Dynamically cache audio files as they are loaded
+                    if (url.pathname.includes('/audio/')) {
+                        const responseClone = networkResponse.clone();
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(event.request, responseClone);
+                        });
+                    }
+                    return networkResponse;
+                }).catch(() => {
+                    // Return offline fallback if needed
+                });
+            })
     );
 });
