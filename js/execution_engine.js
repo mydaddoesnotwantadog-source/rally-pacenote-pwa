@@ -1,8 +1,7 @@
 // execution_engine.js
-import { resetGPSEngine, processGPSUpdate, processAccelerationUpdate } from './gps_engine.js';
+import { resetGPSEngine, processGPSUpdate } from './gps_engine.js';
 
 let watchId = null;
-let accelHandler = null;
 let currentRoute = null;
 let upcomingPacenotes = [];
 let currentNoteIndex = 0;
@@ -67,16 +66,15 @@ export function startDrive(routeData, pacenotesData) {
         const startCoord = (routeData && routeData.length > 0) ? routeData[0] : {lat: 0, lon: 0};
         driveMap = L.map('drive-map', {
             zoomControl: false,
+            attributionControl: false,
             dragging: false,
-            touchZoom: false,
             scrollWheelZoom: false,
             doubleClickZoom: false,
-            boxZoom: false,
-            keyboard: false
+            keyboard: false,
+            touchZoom: false
         }).setView([startCoord.lat, startCoord.lon], 18);
 
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; CartoDB',
             maxZoom: 20
         }).addTo(driveMap);
     }
@@ -91,18 +89,15 @@ export function startDrive(routeData, pacenotesData) {
     // Draw route polyline
     const routeCoords = routeData.map(c => [c.lat, c.lon]);
     L.polyline(routeCoords, {
-        color: 'rgba(255, 255, 255, 0.4)',
-        weight: 8,
-        lineCap: 'round',
-        lineJoin: 'round'
+        color: '#ff2a2a',
+        weight: 6,
+        opacity: 0.8
     }).addTo(driveMap);
 
-    // Draw pacenotes with severity color coding
-    // 1-2=Green (Flat/Easy), 3-4=Yellow (Medium), 5-6=Red (Sharp), 7=Black (Hairpin)
+    // Plot pacenote severity markers
     upcomingPacenotes.forEach(note => {
-        let color = '#00FF00'; 
-        if (note.severityRank === 3 || note.severityRank === 4) color = '#FFA500';
-        else if (note.severityRank === 5 || note.severityRank === 6) color = '#FF0000';
+        let color = '#2aff2a';
+        if (note.severityRank >= 4 && note.severityRank <= 6) color = '#ffaa00';
         else if (note.severityRank >= 7) color = '#000000';
 
         L.circleMarker([note.lat, note.lon], {
@@ -128,28 +123,12 @@ export function startDrive(routeData, pacenotesData) {
             { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
         );
     }
-
-    if (window.DeviceMotionEvent) {
-        accelHandler = (event) => {
-            const acc = event.acceleration; // excluding gravity
-            if (acc && acc.y !== null && acc.x !== null) {
-                // Forward/Backward usually Y, Left/Right usually X
-                // Requires the phone to be upright.
-                processAccelerationUpdate(acc.y, acc.x, lastHeading, Date.now());
-            }
-        };
-        window.addEventListener('devicemotion', accelHandler);
-    }
 }
 
 export function stopDrive() {
     if (watchId !== null) {
         navigator.geolocation.clearWatch(watchId);
         watchId = null;
-    }
-    if (accelHandler !== null) {
-        window.removeEventListener('devicemotion', accelHandler);
-        accelHandler = null;
     }
 }
 

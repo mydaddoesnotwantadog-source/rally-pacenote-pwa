@@ -21,8 +21,8 @@ class GPSKalmanFilter {
         // Process Noise (how much we trust the model vs measurements)
         this.Q = 0.001; 
         
-        // Measurement Noise (based on GPS accuracy)
-        this.R = 0.01; 
+        // Measurement Noise (based on GPS accuracy, but we will convert meters to degrees)
+        this.R = 1.0; 
     }
 
     reset() {
@@ -51,15 +51,27 @@ class GPSKalmanFilter {
         this.P[3][3] += this.Q;
 
         // Measurement Step
-        const headingRad = heading * Math.PI / 180;
-        const vLat = (speed * Math.cos(headingRad)) / 111320;
-        const vLon = (speed * Math.sin(headingRad)) / (111320 * Math.cos(lat * Math.PI / 180));
+        // Fallback: If device reports 0 speed, calculate it from raw coords to prevent the Kalman filter from stopping
+        let effSpeed = speed;
+        let effHeading = heading;
+        
+        if (effSpeed === 0 || effSpeed === null || isNaN(effSpeed)) {
+             const distRaw = distanceMeters(this.state[0], this.state[1], lat, lon);
+             effSpeed = distRaw / dt;
+             effHeading = calculateBearing(this.state[0], this.state[1], lat, lon);
+        }
 
-        // Adapt R based on GPS reported accuracy
-        const dynamicR = this.R * (accuracy / 5.0); 
+        const headingRad = effHeading * Math.PI / 180;
+        const vLat = (effSpeed * Math.cos(headingRad)) / 111320;
+        const vLon = (effSpeed * Math.sin(headingRad)) / (111320 * Math.cos(lat * Math.PI / 180));
+
+        // Adapt R based on GPS reported accuracy (convert meters to degrees)
+        // A 10m accuracy is roughly 0.00009 degrees
+        const accuracyDegrees = (accuracy || 10) / 111320;
+        const dynamicR = accuracyDegrees * accuracyDegrees; // variance
 
         const K_pos = this.P[0][0] / (this.P[0][0] + dynamicR);
-        const K_vel = this.P[2][2] / (this.P[2][2] + dynamicR * 2);
+        const K_vel = this.P[2][2] / (this.P[2][2] + (dynamicR * 2));
 
         // Update State
         this.state[0] = this.state[0] + K_pos * (lat - this.state[0]);
@@ -77,42 +89,6 @@ class GPSKalmanFilter {
             lat: this.state[0],
             lon: this.state[1]
         };
-    }
-
-    updateAcceleration(accelForward, accelRight, heading, timestamp) {
-        if (!this.initialized) return;
-        const dt = (timestamp - this.lastTime) / 1000.0;
-        if (dt <= 0 || dt > 1.0) return; // Ignore large gaps or zero time
-        this.lastTime = timestamp;
-
-        // Convert forward/right acceleration (m/s^2) to lat/lon acceleration using current heading
-        const headingRad = heading * Math.PI / 180;
-        
-        // Very basic rotation matrix. Assuming forward is positive Y.
-        const aY = accelForward;
-        const aX = accelRight;
-
-        const aLatMs = aY * Math.cos(headingRad) - aX * Math.sin(headingRad);
-        const aLonMs = aY * Math.sin(headingRad) + aX * Math.cos(headingRad);
-
-        // Convert m/s^2 to degrees/sec^2
-        const aLat = aLatMs / 111320;
-        const aLon = aLonMs / (111320 * Math.cos(this.state[0] * Math.PI / 180));
-
-        // Predict Step with acceleration
-        // state[0] = lat + v*dt + 0.5*a*dt^2
-        this.state[0] += this.state[2] * dt + 0.5 * aLat * dt * dt;
-        this.state[1] += this.state[3] * dt + 0.5 * aLon * dt * dt;
-        
-        // state[2] = v_lat + a_lat*dt
-        this.state[2] += aLat * dt;
-        this.state[3] += aLon * dt;
-
-        // P = F*P*F^T + Q
-        this.P[0][0] += dt * dt * this.P[2][2] + this.Q;
-        this.P[1][1] += dt * dt * this.P[3][3] + this.Q;
-        this.P[2][2] += this.Q;
-        this.P[3][3] += this.Q;
     }
 }
 
@@ -250,8 +226,4 @@ export function processGPSUpdate(position, routeData) {
         rawLat: rawLat,
         rawLon: rawLon
     };
-}
-
-export function processAccelerationUpdate(accelForward, accelRight, heading, timestamp) {
-    kf.updateAcceleration(accelForward, accelRight, heading, timestamp);
 }
