@@ -460,11 +460,24 @@ h1 .accent {
     transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
+.map-drag-handle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 60px;
+    cursor: grab;
+    padding: 12px;
+}
+
+.map-drag-handle:active {
+    cursor: grabbing;
+}
+
 .map-container.map-fullscreen .map-overlay {
-    /* Push it up above the collapsed bottom sheet */
-    transform: translateY(calc(-100% - 122px));
-    /* Wait, translateY is relative to itself, so we just use bottom */
-    bottom: 122px; 
+    /* When fullscreen, map overlay handles are hidden because bottom sheet takes over */
+    opacity: 0 !important;
+    pointer-events: none;
 }
 
 .status-text {

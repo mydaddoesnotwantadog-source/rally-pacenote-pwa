@@ -235,11 +235,20 @@ function initMap() {
     }).addTo(map);
 
     let userMarker = null;
+    let locationDetected = false;
 
     if (navigator.geolocation) {
         navigator.geolocation.watchPosition((pos) => {
             const latlng = [pos.coords.latitude, pos.coords.longitude];
             const heading = pos.coords.heading || 0;
+            
+            if (!locationDetected) {
+                locationDetected = true;
+                // Rough bounding box for contiguous USA
+                if (latlng[0] > 24.39 && latlng[0] < 49.38 && latlng[1] > -125.0 && latlng[1] < -66.93) {
+                    setUnits(false); // Set to Imperial (MI)
+                }
+            }
             
             if (!userMarker) {
                 map.setView(latlng, 13);
@@ -423,12 +432,16 @@ function initMap() {
     setupBottomSheetLogic(() => {
         isUserExitedFullscreen = true;
         exitFullscreenMap();
+    }, () => {
+        // When user manually pulls down the map expand handle
+        enterFullscreenMap();
     });
 }
 
-function setupBottomSheetLogic(onExitFullscreen) {
+function setupBottomSheetLogic(onExitFullscreen, onEnterFullscreen) {
     const bottomSheet = document.getElementById('setup-bottom-sheet');
     const dragHandle = document.querySelector('.drag-handle-container');
+    const expandHandle = document.getElementById('map-expand-handle');
     
     if (!bottomSheet || !dragHandle) return;
 
@@ -437,6 +450,7 @@ function setupBottomSheetLogic(onExitFullscreen) {
     let isDragging = false;
     let startTransform = 0; // 0 is expanded, positive is collapsed
 
+    // BOTTOM SHEET SWIPE UP TO EXIT
     dragHandle.addEventListener('touchstart', (e) => {
         if (!bottomSheet.classList.contains('fullscreen-mode')) return;
         isDragging = true;
@@ -478,6 +492,35 @@ function setupBottomSheetLogic(onExitFullscreen) {
             onExitFullscreen();
         }
     });
+
+    // MAP OVERLAY SWIPE DOWN TO EXPAND
+    if (expandHandle) {
+        let expandStartY = 0;
+        let expandCurrentY = 0;
+        let isExpandDragging = false;
+
+        expandHandle.addEventListener('touchstart', (e) => {
+            isExpandDragging = true;
+            expandStartY = e.touches[0].clientY;
+        });
+
+        expandHandle.addEventListener('touchmove', (e) => {
+            if (!isExpandDragging) return;
+            expandCurrentY = e.touches[0].clientY;
+        });
+
+        expandHandle.addEventListener('touchend', (e) => {
+            if (!isExpandDragging) return;
+            isExpandDragging = false;
+            
+            let delta = expandCurrentY - expandStartY;
+            
+            // If dragging down sufficiently, enter fullscreen
+            if (delta > 30 && onEnterFullscreen) {
+                onEnterFullscreen();
+            }
+        });
+    }
 }
 
 function updateStatsUI(summary) {
