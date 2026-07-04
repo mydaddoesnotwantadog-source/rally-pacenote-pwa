@@ -461,13 +461,23 @@ h1 .accent {
 }
 
 .map-drag-handle {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100%;
-    width: 60px;
+    width: 200px; /* Big touch target */
     cursor: grab;
     padding: 12px;
+}
+
+.map-drag-handle .drag-handle {
+    width: 100px; /* Wider handle */
+    height: 8px; /* Thicker */
+    background: #fff;
+    opacity: 0.8;
 }
 
 .map-drag-handle:active {

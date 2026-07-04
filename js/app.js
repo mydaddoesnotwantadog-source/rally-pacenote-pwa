@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 const setupFlow = document.getElementById('setup-flow');
 const driveScreen = document.getElementById('drive-screen');
-const uploadStatus = document.getElementById('upload-status');
+const uploadStatus = document.getElementById('upload-status') || { textContent: '' };
 const startDriveBtn = document.getElementById('start-drive-btn');
 const stopDriveBtn = document.getElementById('stop-drive-btn');
 const clearRouteBtn = document.getElementById('clear-route-btn');
@@ -278,7 +278,8 @@ function initMap() {
         show: false,
         addWaypoints: true,
         lineOptions: {
-            styles: [{ color: 'var(--accent-red)', opacity: 0.9, weight: 6 }]
+            styles: [{ color: 'var(--accent-red)', opacity: 0.9, weight: 6 }],
+            renderer: L.canvas()
         },
         createMarker: function(i, wp, nWps) {
             // Create draggable markers with custom automotive minimalist numbered pins
@@ -506,8 +507,10 @@ function setupBottomSheetLogic(onExitFullscreen, onEnterFullscreen) {
 
         expandHandle.addEventListener('touchmove', (e) => {
             if (!isExpandDragging) return;
+            // Prevent pull-to-refresh or scrolling
+            e.preventDefault();
             expandCurrentY = e.touches[0].clientY;
-        });
+        }, { passive: false });
 
         expandHandle.addEventListener('touchend', (e) => {
             if (!isExpandDragging) return;
@@ -516,7 +519,8 @@ function setupBottomSheetLogic(onExitFullscreen, onEnterFullscreen) {
             let delta = expandCurrentY - expandStartY;
             
             // If dragging down sufficiently, enter fullscreen
-            if (delta > 30 && onEnterFullscreen) {
+            // Fallback: If they just tapped it (delta == 0), also expand!
+            if ((delta > 20 || delta === 0) && onEnterFullscreen) {
                 onEnterFullscreen();
             }
         });
