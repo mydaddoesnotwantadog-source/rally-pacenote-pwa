@@ -79,26 +79,20 @@
 
                     <div class="map-container">
                         <div id="map"></div>
-                        <div class="map-overlay" id="map-expand-handle">
-                            <div class="map-drag-handle">
+                        <div class="map-overlay">
+                            <div class="map-drag-handle" id="map-expand-handle">
                                 <div class="drag-handle"></div>
                             </div>
                             <div class="overlay-buttons">
-                                <button class="minimal-btn clear-route-btn">CLR</button>
+                                <button id="sensor-auth-btn" class="minimal-btn">SNSR</button>
+                                <button id="clear-route-btn" class="minimal-btn">CLR</button>
                             </div>
                         </div>
                     </div>
 
                     <!-- BOTTOM SHEET (STATS & INITIATE) -->
                     <div id="setup-bottom-sheet" class="bottom-sheet">
-                        <div class="drag-handle-container" id="map-collapse-handle">
-                            <div class="map-drag-handle">
-                                <div class="drag-handle"></div>
-                            </div>
-                            <div class="overlay-buttons">
-                                <button class="minimal-btn clear-route-btn">CLR</button>
-                            </div>
-                        </div>
+
 
                         <button id="start-drive-btn" class="primary-btn hold-to-start" disabled>
                             <svg class="perimeter-svg">

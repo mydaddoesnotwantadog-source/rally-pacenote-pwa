@@ -100,7 +100,7 @@ const driveScreen = document.getElementById('drive-screen');
 const uploadStatus = document.getElementById('upload-status') || { textContent: '' };
 const startDriveBtn = document.getElementById('start-drive-btn');
 const stopDriveBtn = document.getElementById('stop-drive-btn');
-const clearRouteBtns = document.querySelectorAll('.clear-route-btn');
+const clearRouteBtn = document.getElementById('clear-route-btn');
 
 // --- STAT ELEMENTS ---
 const statDist = document.getElementById('stat-dist');
@@ -358,12 +358,10 @@ function initMap() {
         
         document.querySelector('.system-status').style.opacity = '0';
         document.getElementById('unit-toggle').style.opacity = '0';
-        document.querySelector('.map-overlay').style.opacity = '0';
         
         setTimeout(() => {
             document.querySelector('.system-status').style.visibility = 'hidden';
             document.getElementById('unit-toggle').style.visibility = 'hidden';
-            document.querySelector('.map-overlay').style.visibility = 'hidden';
         }, 400);
 
         // Continuously invalidate size during CSS transition for smooth animation
@@ -391,12 +389,10 @@ function initMap() {
         
         document.querySelector('.system-status').style.visibility = 'visible';
         document.getElementById('unit-toggle').style.visibility = 'visible';
-        document.querySelector('.map-overlay').style.visibility = 'visible';
         
         setTimeout(() => {
             document.querySelector('.system-status').style.opacity = '1';
             document.getElementById('unit-toggle').style.opacity = '1';
-            document.querySelector('.map-overlay').style.opacity = '1';
         }, 10);
 
         // Continuously invalidate size during CSS transition for smooth animation
@@ -439,106 +435,73 @@ function initMap() {
 }
 
 function setupBottomSheetLogic(onExitFullscreen, onEnterFullscreen) {
-    const bottomSheet = document.getElementById('setup-bottom-sheet');
-    const dragHandle = document.querySelector('.drag-handle-container');
-    const expandHandle = document.getElementById('map-expand-handle');
     const mapContainer = document.querySelector('.map-container');
+    const mapOverlay = document.querySelector('.map-overlay');
     
-    if (!bottomSheet || !dragHandle) return;
+    if (!mapOverlay || !mapContainer) return;
 
     let startY = 0;
     let currentY = 0;
     let isDragging = false;
     let startMapHeight = 0;
+    const normalHeight = 350;
 
-    // BOTTOM SHEET SWIPE UP TO EXIT
-    dragHandle.addEventListener('touchstart', (e) => {
-        if (!mapContainer.classList.contains('map-fullscreen')) return;
+    mapOverlay.addEventListener('touchstart', (e) => {
+        // Prevent dragging if target is a button
+        if (e.target.closest('.minimal-btn')) return;
+        
         isDragging = true;
         startY = e.touches[0].clientY;
-        
         startMapHeight = mapContainer.offsetHeight;
+        
         mapContainer.style.transition = 'none';
     });
 
-    dragHandle.addEventListener('touchmove', (e) => {
+    mapOverlay.addEventListener('touchmove', (e) => {
         if (!isDragging) return;
+        // Prevent pull-to-refresh or scrolling
+        e.preventDefault();
         currentY = e.touches[0].clientY;
+        
         let delta = currentY - startY;
+        let newHeight = startMapHeight + delta;
         
-        // Only allow swiping UP (negative delta) to exit fullscreen
-        if (delta > 0) delta = 0; 
+        const setupScreen = document.getElementById('setup-screen-content');
+        const maxHeight = setupScreen.offsetHeight - 180;
         
-        mapContainer.style.height = (startMapHeight + delta) + 'px';
+        if (newHeight < normalHeight) newHeight = normalHeight;
+        if (newHeight > maxHeight) newHeight = maxHeight;
+        
+        mapContainer.style.height = newHeight + 'px';
+        mapContainer.style.flex = 'none';
+        
         if (typeof map !== 'undefined') map.invalidateSize();
-    });
+    }, { passive: false });
 
-    dragHandle.addEventListener('touchend', (e) => {
+    mapOverlay.addEventListener('touchend', (e) => {
         if (!isDragging) return;
         isDragging = false;
         
-        mapContainer.style.transition = 'all 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
-
-        let delta = currentY - startY;
+        const setupScreen = document.getElementById('setup-screen-content');
+        const maxHeight = setupScreen.offsetHeight - 180;
+        const currentHeight = mapContainer.offsetHeight;
+        const midPoint = normalHeight + (maxHeight - normalHeight) / 2;
         
-        if (delta < -50 && onExitFullscreen) {
+        mapContainer.style.transition = 'all 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
+        
+        if (currentHeight > midPoint) {
             mapContainer.style.height = '';
-            onExitFullscreen();
+            mapContainer.style.flex = '';
+            if (onEnterFullscreen) onEnterFullscreen();
         } else {
-            mapContainer.style.height = ''; // Reverts to CSS map-fullscreen class height
-        }
-    });
-
-    // MAP OVERLAY SWIPE DOWN TO EXPAND
-    if (expandHandle) {
-        let expandStartY = 0;
-        let expandCurrentY = 0;
-        let isExpandDragging = false;
-        let startMapHeightExpand = 0;
-
-        expandHandle.addEventListener('touchstart', (e) => {
-            isExpandDragging = true;
-            expandStartY = e.touches[0].clientY;
-            startMapHeightExpand = mapContainer.offsetHeight;
-            
-            mapContainer.style.transition = 'none';
-        });
-
-        expandHandle.addEventListener('touchmove', (e) => {
-            if (!isExpandDragging) return;
-            // Prevent pull-to-refresh or scrolling
-            e.preventDefault();
-            expandCurrentY = e.touches[0].clientY;
-            
-            let delta = expandCurrentY - expandStartY;
-            if (delta < 0) delta = 0; // only drag down
-            
-            mapContainer.style.height = (startMapHeightExpand + delta) + 'px';
-            mapContainer.style.flex = 'none';
-            if (typeof map !== 'undefined') map.invalidateSize();
-        }, { passive: false });
-
-        expandHandle.addEventListener('touchend', (e) => {
-            if (!isExpandDragging) return;
-            isExpandDragging = false;
-            
-            let delta = expandCurrentY - expandStartY;
-            
-            mapContainer.style.transition = 'all 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
-            
-            if ((delta > 20 || delta === 0) && onEnterFullscreen) {
+            mapContainer.style.height = normalHeight + 'px';
+            setTimeout(() => {
                 mapContainer.style.height = '';
                 mapContainer.style.flex = '';
-                onEnterFullscreen();
-            } else {
-                mapContainer.style.height = startMapHeightExpand + 'px';
-                setTimeout(() => {
-                    mapContainer.style.height = '';
-                    mapContainer.style.flex = '';
-                }, 400);
-            }
-        });
-    }
+            }, 400);
+            if (onExitFullscreen) onExitFullscreen();
+        }
+    });
 }
 
 function updateStatsUI(summary) {
@@ -575,20 +538,18 @@ function updateStatsUI(summary) {
     statHairpins.textContent = hairpinCount;
 }
 
-clearRouteBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-        routingControl.setWaypoints([]);
-        currentRouteData = null;
-        generatedNotes = null;
-        
-        statDist.textContent = '--';
-        statTurns.textContent = '--';
-        statAvg.textContent = '--';
-        statHairpins.textContent = '0';
-        
-        startDriveBtn.disabled = true;
-        uploadStatus.textContent = 'AWAITING INPUT...';
-    });
+clearRouteBtn.addEventListener('click', () => {
+    routingControl.setWaypoints([]);
+    currentRouteData = null;
+    generatedNotes = null;
+    
+    statDist.textContent = '--';
+    statTurns.textContent = '--';
+    statAvg.textContent = '--';
+    statHairpins.textContent = '0';
+    
+    startDriveBtn.disabled = true;
+    uploadStatus.textContent = 'AWAITING INPUT...';
 });
 
 // --- DRIVE ENGINE ---

@@ -361,11 +361,9 @@ h1 .accent {
 /* Map Container */
 .map-container {
     position: relative;
-    height: 40vh; /* Replaces flex-basis to allow smooth height transitions */
+    flex: 0 1 350px; /* Allow shrinking so it doesn't force a scrollbar */
     min-height: 150px;
-    max-height: 400px;
     width: 100%;
-    flex: none;
     border-bottom: 2px solid var(--surface-border);
     transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
@@ -401,26 +399,15 @@ h1 .accent {
     transform: translateY(0);
 }
 
-.drag-handle-container {
-    display: none;
-    width: 100%;
-    height: 48px;
-    background: var(--surface-border);
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 12px;
-    position: relative;
-}
 
-.drag-handle-container:active {
-    cursor: grabbing;
-}
 
-.bottom-sheet.fullscreen-mode .drag-handle-container {
-    display: flex;
+.drag-handle {
+    width: 60px;
+    height: 6px;
+    background: var(--text-secondary);
+    border-radius: 3px;
+    opacity: 0.5;
 }
-
-    /* The .map-drag-handle is defined later */
 
 /* Fix for missing tiles: set map background to black instead of gray */
 .leaflet-container {
@@ -437,34 +424,34 @@ h1 .accent {
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 48px;
-    background: var(--surface-border);
+    padding: 12px 24px;
+    background: rgba(10, 10, 10, 0.85);
     z-index: 400; /* Above map tiles */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 12px;
-    transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    border-top: 1px solid var(--surface-border);
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .map-drag-handle {
     position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 12px; 
+    right: 70px; /* Space for buttons on the right */
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100%;
-    width: 160px; /* Longer centered bar */
     cursor: grab;
+    padding: 12px 0;
 }
 
 .map-drag-handle .drag-handle {
     width: 100%;
-    height: 4px; /* Thinner */
-    background: var(--text-secondary); /* Style of the exit bar */
-    border-radius: 2px;
+    height: 4px;
+    background: #fff;
     opacity: 0.8;
+    border-radius: 2px;
 }
 
 .map-drag-handle:active {
