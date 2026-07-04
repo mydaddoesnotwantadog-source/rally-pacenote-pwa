@@ -100,7 +100,7 @@ const driveScreen = document.getElementById('drive-screen');
 const uploadStatus = document.getElementById('upload-status') || { textContent: '' };
 const startDriveBtn = document.getElementById('start-drive-btn');
 const stopDriveBtn = document.getElementById('stop-drive-btn');
-const clearRouteBtn = document.getElementById('clear-route-btn');
+const clearRouteBtns = document.querySelectorAll('.clear-route-btn');
 
 // --- STAT ELEMENTS ---
 const statDist = document.getElementById('stat-dist');
@@ -575,18 +575,20 @@ function updateStatsUI(summary) {
     statHairpins.textContent = hairpinCount;
 }
 
-clearRouteBtn.addEventListener('click', () => {
-    routingControl.setWaypoints([]);
-    currentRouteData = null;
-    generatedNotes = null;
-    
-    statDist.textContent = '--';
-    statTurns.textContent = '--';
-    statAvg.textContent = '--';
-    statHairpins.textContent = '0';
-    
-    startDriveBtn.disabled = true;
-    uploadStatus.textContent = 'AWAITING INPUT...';
+clearRouteBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        routingControl.setWaypoints([]);
+        currentRouteData = null;
+        generatedNotes = null;
+        
+        statDist.textContent = '--';
+        statTurns.textContent = '--';
+        statAvg.textContent = '--';
+        statHairpins.textContent = '0';
+        
+        startDriveBtn.disabled = true;
+        uploadStatus.textContent = 'AWAITING INPUT...';
+    });
 });
 
 // --- DRIVE ENGINE ---
