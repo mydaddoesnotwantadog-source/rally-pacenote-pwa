@@ -425,7 +425,7 @@ h1 .accent {
     left: 0;
     width: 100%;
     padding: 12px 24px;
-    background: rgba(10, 10, 10, 0.85);
+    background: #000;
     z-index: 400; /* Above map tiles */
     display: flex;
     justify-content: space-between;

@@ -485,21 +485,36 @@ function setupBottomSheetLogic(onExitFullscreen, onEnterFullscreen) {
         const setupScreen = document.getElementById('setup-screen-content');
         const maxHeight = setupScreen.offsetHeight - 180;
         const currentHeight = mapContainer.offsetHeight;
-        const midPoint = normalHeight + (maxHeight - normalHeight) / 2;
         
         mapContainer.style.transition = 'all 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
         
-        if (currentHeight > midPoint) {
-            mapContainer.style.height = '';
-            mapContainer.style.flex = '';
-            if (onEnterFullscreen) onEnterFullscreen();
-        } else {
-            mapContainer.style.height = normalHeight + 'px';
-            setTimeout(() => {
+        let delta = currentY - startY;
+        let isCurrentlyFullscreen = mapContainer.classList.contains('map-fullscreen');
+        
+        if (isCurrentlyFullscreen) {
+            if (delta < -30 || delta === 0 || currentHeight < maxHeight - 100) {
+                mapContainer.style.height = normalHeight + 'px';
+                setTimeout(() => {
+                    mapContainer.style.height = '';
+                    mapContainer.style.flex = '';
+                }, 400);
+                if (onExitFullscreen) onExitFullscreen();
+            } else {
                 mapContainer.style.height = '';
                 mapContainer.style.flex = '';
-            }, 400);
-            if (onExitFullscreen) onExitFullscreen();
+            }
+        } else {
+            if (delta > 30 || delta === 0 || currentHeight > normalHeight + 100) {
+                mapContainer.style.height = '';
+                mapContainer.style.flex = '';
+                if (onEnterFullscreen) onEnterFullscreen();
+            } else {
+                mapContainer.style.height = normalHeight + 'px';
+                setTimeout(() => {
+                    mapContainer.style.height = '';
+                    mapContainer.style.flex = '';
+                }, 400);
+            }
         }
     });
 }
