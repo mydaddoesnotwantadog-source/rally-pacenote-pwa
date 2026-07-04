@@ -522,6 +522,7 @@ function setupBottomSheetLogic(onExitFullscreen, onEnterFullscreen) {
             
             mapContainer.style.height = (startMapHeight + delta) + 'px';
             mapContainer.style.flex = 'none';
+            map.invalidateSize(); // Prevent rendering jitter during drag
         }, { passive: false });
 
         expandHandle.addEventListener('touchend', (e) => {

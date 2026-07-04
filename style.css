@@ -368,12 +368,8 @@ h1 .accent {
 }
 
 .map-container.map-fullscreen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
     height: 100vh;
-    z-index: 5; /* Below header (z-index: 100) but above background */
+    z-index: 5;
     flex: none;
     border-bottom: none;
 }
@@ -462,8 +458,8 @@ h1 .accent {
 
 .map-drag-handle {
     position: absolute;
-    left: 12px;
-    right: 70px; /* Space for buttons on the right */
+    left: 70px; /* Space for buttons on the left */
+    right: 12px;
     display: flex;
     justify-content: center;
     align-items: center;
