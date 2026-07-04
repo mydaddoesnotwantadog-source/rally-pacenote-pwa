@@ -1,7 +1,7 @@
 $listener = New-Object System.Net.HttpListener
-$listener.Prefixes.Add("http://localhost:8080/")
+$listener.Prefixes.Add("http://*:8080/")
 $listener.Start()
-Write-Host "Listening on http://localhost:8080/"
+Write-Host "Listening on http://*:8080/ (accessible from other devices on your local network)"
 
 try {
     while ($listener.IsListening) {
@@ -26,7 +26,10 @@ try {
                     ".html" { $response.ContentType = "text/html" }
                     ".css"  { $response.ContentType = "text/css" }
                     ".js"   { $response.ContentType = "application/javascript" }
+                    ".json" { $response.ContentType = "application/json" }
                     ".ogg"  { $response.ContentType = "audio/ogg" }
+                    ".png"  { $response.ContentType = "image/png" }
+                    ".svg"  { $response.ContentType = "image/svg+xml" }
                     default { $response.ContentType = "application/octet-stream" }
                 }
                 

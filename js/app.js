@@ -217,7 +217,13 @@ let lastRouteSummary = null;
 
 // --- MAP & ROUTING ---
 function initMap() {
-    map = L.map('map', { zoomControl: false }).setView([39.8283, -98.5795], 4);
+    map = L.map('map', { 
+        zoomControl: false,
+        dragging: true,
+        touchZoom: true,
+        scrollWheelZoom: true,
+        doubleClickZoom: true
+    }).setView([39.8283, -98.5795], 4);
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
@@ -323,10 +329,91 @@ function initMap() {
         }
     });
 
+    routingControl.on('waypointschanged', function(e) {
+        const waypoints = e.waypoints.filter(w => w.latLng !== null);
+        const mapContainer = document.querySelector('.map-container');
+        const bottomSheet = document.getElementById('setup-bottom-sheet');
+        
+        if (waypoints.length >= 1) {
+            if (!mapContainer.classList.contains('map-fullscreen')) {
+                mapContainer.classList.add('map-fullscreen');
+                bottomSheet.classList.add('fullscreen-mode');
+                // Give CSS time to apply absolute position, then invalidate size to fix tiles
+                setTimeout(() => map.invalidateSize(), 400);
+            }
+        } else {
+            mapContainer.classList.remove('map-fullscreen');
+            bottomSheet.classList.remove('fullscreen-mode');
+            bottomSheet.classList.remove('expanded');
+            setTimeout(() => map.invalidateSize(), 400);
+        }
+    });
+
     map.on('click', function(e) {
         const waypoints = routingControl.getWaypoints().filter(wp => wp.latLng !== null);
         waypoints.push(L.Routing.waypoint(e.latlng));
         routingControl.setWaypoints(waypoints);
+    });
+
+    setupBottomSheetLogic();
+}
+
+function setupBottomSheetLogic() {
+    const bottomSheet = document.getElementById('setup-bottom-sheet');
+    const dragHandle = document.querySelector('.drag-handle-container');
+    
+    if (!bottomSheet || !dragHandle) return;
+
+    let startY = 0;
+    let currentY = 0;
+    let isDragging = false;
+    let startTransform = 0; // 0 is expanded, positive is collapsed
+
+    dragHandle.addEventListener('touchstart', (e) => {
+        if (!bottomSheet.classList.contains('fullscreen-mode')) return;
+        isDragging = true;
+        startY = e.touches[0].clientY;
+        
+        // Remove transition during drag for 1:1 movement
+        bottomSheet.style.transition = 'none';
+        startTransform = bottomSheet.classList.contains('expanded') ? 0 : bottomSheet.offsetHeight - 122;
+    });
+
+    dragHandle.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        currentY = e.touches[0].clientY;
+        let delta = currentY - startY;
+        
+        let newTransform = startTransform + delta;
+        // Clamp between 0 (fully expanded) and bottomSheet.offsetHeight - 122 (collapsed)
+        const maxTransform = bottomSheet.offsetHeight - 122;
+        if (newTransform < 0) newTransform = 0;
+        if (newTransform > maxTransform) newTransform = maxTransform;
+
+        bottomSheet.style.transform = `translateY(${newTransform}px)`;
+    });
+
+    dragHandle.addEventListener('touchend', (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        
+        // Restore transition
+        bottomSheet.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
+        bottomSheet.style.transform = ''; // Clear inline style to let CSS take over
+
+        let delta = currentY - startY;
+        
+        if (bottomSheet.classList.contains('expanded')) {
+            // If dragging down from expanded state
+            if (delta > 50) {
+                bottomSheet.classList.remove('expanded');
+            }
+        } else {
+            // If dragging up from collapsed state
+            if (delta < -50) {
+                bottomSheet.classList.add('expanded');
+            }
+        }
     });
 }
 
