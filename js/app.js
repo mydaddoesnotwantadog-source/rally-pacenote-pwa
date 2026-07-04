@@ -338,6 +338,17 @@ function initMap() {
             if (!mapContainer.classList.contains('map-fullscreen')) {
                 mapContainer.classList.add('map-fullscreen');
                 bottomSheet.classList.add('fullscreen-mode');
+                
+                document.querySelector('.system-status').style.opacity = '0';
+                document.getElementById('unit-toggle').style.opacity = '0';
+                document.querySelector('.map-overlay').style.opacity = '0';
+                
+                setTimeout(() => {
+                    document.querySelector('.system-status').style.display = 'none';
+                    document.getElementById('unit-toggle').style.display = 'none';
+                    document.querySelector('.map-overlay').style.display = 'none';
+                }, 400);
+
                 // Give CSS time to apply absolute position, then invalidate size to fix tiles
                 setTimeout(() => map.invalidateSize(), 400);
             }
@@ -345,6 +356,17 @@ function initMap() {
             mapContainer.classList.remove('map-fullscreen');
             bottomSheet.classList.remove('fullscreen-mode');
             bottomSheet.classList.remove('expanded');
+            
+            document.querySelector('.system-status').style.display = '';
+            document.getElementById('unit-toggle').style.display = '';
+            document.querySelector('.map-overlay').style.display = '';
+            
+            setTimeout(() => {
+                document.querySelector('.system-status').style.opacity = '1';
+                document.getElementById('unit-toggle').style.opacity = '1';
+                document.querySelector('.map-overlay').style.opacity = '1';
+            }, 10);
+
             setTimeout(() => map.invalidateSize(), 400);
         }
     });
